@@ -75,13 +75,7 @@ export default {
     unknown: '未知',
   },
   notificationSwitch: {
-    resourceDownload: '資源下載',
-    organize: '整理入庫',
-    subscribe: '訂閱',
-    site: '站點',
-    mediaServer: '媒體伺服器',
-    manual: '手動處理',
-    plugin: '插件',
+    addon: '插件',
     other: '其它',
   },
   actionStep: {
@@ -145,7 +139,7 @@ export default {
     deviceNotSupport: '當前設備不支持監聽系統主題變化',
   },
   app: {
-    moviepilot: 'MoviePilot',
+    moviepilot: 'MitmPilot',
     slogan: '智能影視媒體庫管理工具',
     recommend: '推薦',
     subscribeMovie: '電影訂閱',
@@ -165,7 +159,7 @@ export default {
     onlineMessage: '網絡連接已恢復',
   },
   pwa: {
-    installApp: '安裝 MoviePilot 應用',
+    installApp: '安裝 MitmPilot 應用',
     installDescription: '獲得更好的離線體驗和性能',
     install: '安裝',
     installSuccess: '應用安裝成功！',
@@ -199,7 +193,7 @@ export default {
       },
       chrome: {
         0: '點擊地址欄右側的安裝圖標',
-        1: '或者點擊瀏覽器菜單中的"安裝 MoviePilot"',
+        1: '或者點擊瀏覽器菜單中的"安裝 MitmPilot"',
         2: '點擊"安裝"確認',
       },
       edge: {
@@ -1177,7 +1171,7 @@ export default {
   },
   setting: {
     about: {
-      title: '關於 MoviePilot',
+      title: '關於 MitmPilot',
       softwareVersion: '軟件版本',
       frontendVersion: '前端版本',
       authVersion: '認證資源版本',
@@ -2041,7 +2035,7 @@ export default {
     pluginMarketSetting: {
       title: '插件市場設置',
       repoUrl: '插件倉庫地址',
-      repoPlaceholder: '格式：https://github.com/jxxghp/MoviePilot-Plugins/,https://github.com/xxxx/xxxxxx/',
+      repoPlaceholder: '格式：https://github.com/wumode/MitmPilot-Addons/,https://github.com/xxxx/xxxxxx/',
       repoHint: '多個地址使用换行分隔，僅支援Github倉庫',
       close: '關閉',
       save: '儲存',
@@ -2874,7 +2868,7 @@ export default {
     pluginCount: '{count} 個插件',
   },
   setupWizard: {
-    title: '歡迎使用 MoviePilot ！',
+    title: '歡迎使用 MitmPilot ！',
     subtitle: '按向導完成配置，即刻開始使用。',
     completed: '設定精靈完成！',
     failed: '設定精靈失敗，請重試',

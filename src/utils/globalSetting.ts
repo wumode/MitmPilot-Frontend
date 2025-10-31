@@ -7,7 +7,7 @@ export async function fetchGlobalSettings() {
   try {
     const result: { [key: string]: any } = await api.get('system/global', {
       params: {
-        token: 'moviepilot',
+        token: 'mitmpilot',
       },
       // 手动设置signal，防止reqestOptimizer添加可中断的controller
       signal: globalSettingController.signal,

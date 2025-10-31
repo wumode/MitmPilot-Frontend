@@ -1,5 +1,6 @@
 <script lang="ts" setup>
 import type { Message } from '@/api/types'
+import type { EventSourceMessage } from '@microsoft/fetch-event-source'
 import MessageCard from '@/components/cards/MessageCard.vue'
 import api from '@/api'
 import { useI18n } from 'vue-i18n'

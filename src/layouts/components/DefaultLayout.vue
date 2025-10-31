@@ -4,7 +4,6 @@ import VerticalNavLayout from '@layouts/components/VerticalNavLayout.vue'
 import VerticalNavLink from '@layouts/components/VerticalNavLink.vue'
 import Footer from '@/layouts/components/Footer.vue'
 import UserNofification from '@/layouts/components/UserNotification.vue'
-import SearchBar from '@/layouts/components/SearchBar.vue'
 import ShortcutBar from '@/layouts/components/ShortcutBar.vue'
 import UserProfile from '@/layouts/components/UserProfile.vue'
 import QuickAccess from '@/layouts/components/QuickAccess.vue'
@@ -295,8 +294,6 @@ onMounted(() => {
         <IconBtn v-if="appMode" class="ms-n2" @click="goBack">
           <VIcon icon="mdi-arrow-left" size="32" />
         </IconBtn>
-        <!-- 👉 Search Bar -->
-        <SearchBar />
         <!-- 👉 Spacer -->
         <VSpacer />
         <!-- 👉 Shortcuts -->

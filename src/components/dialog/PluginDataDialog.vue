@@ -44,12 +44,12 @@ const dynamicComponent = defineAsyncComponent({
   // 工厂函数
   loader: async () => {
     try {
-      if (!props.plugin?.id) {
+      if (!props.plugin?.addon_id) {
         throw new Error('插件ID不存在')
       }
 
       // 动态加载远程组件
-      const module = await loadRemoteComponent(props.plugin.id, 'Page')
+      const module = await loadRemoteComponent(props.plugin.addon_id, 'Page')
       componentLoaded.value = true
       return module
     } catch (error) {
@@ -92,9 +92,9 @@ async function loadPluginUIData() {
       return
     }
 
-    const result: { [key: string]: any } = await api.get(`plugin/page/${props.plugin?.id}`)
+    const result: { [key: string]: any } = await api.get(`addon/page/${props.plugin?.addon_id}`)
     if (!result || !result.render_mode) {
-      console.error(`插件 ${props.plugin?.plugin_name} UI数据加载失败：无效的响应`)
+      console.error(`插件 ${props.plugin?.addon_name} UI数据加载失败：无效的响应`)
       return
     }
     renderMode.value = result.render_mode
@@ -126,7 +126,7 @@ onMounted(() => {
 <template>
   <VDialog scrollable max-width="80rem" :fullscreen="!display.mdAndUp.value">
     <!-- Vuetify 渲染模式 -->
-    <VCard v-if="renderMode === 'vuetify'" :title="`${props.plugin?.plugin_name}`">
+    <VCard v-if="renderMode === 'vuetify'" :title="`${props.plugin?.addon_name}`">
       <VDialogCloseBtn @click="emit('close')" />
       <LoadingBanner v-if="!isRefreshed" class="mt-5" />
       <VCardText v-else class="min-h-40">

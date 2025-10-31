@@ -1,8 +1,8 @@
-# MoviePilot-Frontend
+# MitmPilot-Frontend
 
 *中文 | [English](README_EN.md)*
 
-[MoviePilot](https://github.com/jxxghp/MoviePilot) 的前端项目，NodeJS版本：>= `v20.12.1`。
+[MitmPilot](https://github.com/wumode/MitmPilot) 的前端项目，NodeJS版本：>= `v20.12.1`。
 
 ## 特性
 
@@ -13,7 +13,7 @@
 
 ## 模块联邦功能
 
-MoviePilot 现已支持模块联邦（Module Federation）功能，允许插件开发者创建可动态加载的远程组件，实现更丰富的插件用户界面。
+MitmPilot 现已支持模块联邦（Module Federation）功能，允许插件开发者创建可动态加载的远程组件，实现更丰富的插件用户界面。
 
 ### 相关文档
 
@@ -53,7 +53,7 @@ yarn build
 
 1. 使用 `nginx` 等Web服务器托管 `dist` 静态文件，nginx配置参考 `public/nginx.conf`。
 
-2. 使用 `node` 命令直接运行`service.js`，默认监听 `3000` 端口，设置环境变量 `NGINX_PORT` 来调整运行端口。
+2. 使用 `node` 命令直接运行`service.js`，默认监听 `6008` 端口，设置环境变量 `NGINX_PORT` 来调整运行端口。
 
 ```shell
 node dist/service.js

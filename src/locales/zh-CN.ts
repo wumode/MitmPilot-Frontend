@@ -75,13 +75,7 @@ export default {
     unknown: '未知',
   },
   notificationSwitch: {
-    resourceDownload: '资源下载',
-    organize: '整理入库',
-    subscribe: '订阅',
-    site: '站点',
-    mediaServer: '媒体服务器',
-    manual: '手动处理',
-    plugin: '插件',
+    addon: '插件',
     other: '其它',
   },
   actionStep: {
@@ -145,8 +139,8 @@ export default {
     deviceNotSupport: '当前设备不支持监听系统主题变化',
   },
   app: {
-    moviepilot: 'MoviePilot',
-    slogan: '智能影视媒体库管理工具',
+    moviepilot: 'MitmPilot',
+    slogan: 'MitmProxy 插件管理工具',
     recommend: '推荐',
     subscribeMovie: '电影订阅',
     subscribeTv: '电视剧订阅',
@@ -164,7 +158,7 @@ export default {
     onlineMessage: '网络连接已恢复',
   },
   pwa: {
-    installApp: '安装 MoviePilot 应用',
+    installApp: '安装 MitmPilot 应用',
     installDescription: '获得更好的离线体验和性能',
     install: '安装',
     installSuccess: '应用安装成功！',
@@ -198,7 +192,7 @@ export default {
       },
       chrome: {
         0: '点击地址栏右侧的安装图标',
-        1: '或者点击浏览器菜单中的"安装 MoviePilot"',
+        1: '或者点击浏览器菜单中的"安装 MitmPilot"',
         2: '点击"安装"确认',
       },
       edge: {
@@ -1189,7 +1183,7 @@ export default {
   },
   setting: {
     about: {
-      title: '关于 MoviePilot',
+      title: '关于 MitmPilot',
       softwareVersion: '软件版本',
       frontendVersion: '前端版本',
       authVersion: '认证资源版本',
@@ -1208,7 +1202,7 @@ export default {
       currentVersion: '当前版本',
       viewChangelog: '查看变更日志',
       changelog: '变更日志',
-      dataDirectory: '/moviepilot',
+      dataDirectory: '/mitmpilot',
       expand: '展开',
       collapse: '收起',
     },
@@ -2055,7 +2049,7 @@ export default {
     pluginMarketSetting: {
       title: '插件市场设置',
       repoUrl: '插件仓库地址',
-      repoPlaceholder: '格式：https://github.com/jxxghp/MoviePilot-Plugins/,https://github.com/xxxx/xxxxxx/',
+      repoPlaceholder: '格式：https://github.com/wumode/MitmPilot-Addons/,https://github.com/xxxx/xxxxxx/',
       repoHint: '多个地址使用换行分隔，仅支持Github仓库',
       close: '关闭',
       save: '保存',
@@ -2888,7 +2882,7 @@ export default {
     pluginCount: '{count} 个插件',
   },
   setupWizard: {
-    title: '欢迎使用 MoviePilot ！',
+    title: '欢迎使用 MitmPilot ！',
     subtitle: '按向导完成配置，即刻开始使用。',
     completed: '配置向导完成！',
     failed: '配置向导失败，请重试',

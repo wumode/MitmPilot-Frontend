@@ -77,7 +77,7 @@ function handleSSEMessage(event: MessageEvent) {
 
 // 使用优化的SSE连接，添加延迟确保弹窗完全打开
 const { manager, isConnected } = useSSE(
-  `${import.meta.env.VITE_API_BASE_URL}system/logging?logfile=${encodeURIComponent(props.logfile) ?? 'moviepilot.log'}`,
+  `${import.meta.env.VITE_API_BASE_URL}system/logging?logfile=${encodeURIComponent(props.logfile) ?? 'mitmpilot.log'}`,
   handleSSEMessage,
   `logging-${props.logfile}`,
   {

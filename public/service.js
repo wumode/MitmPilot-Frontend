@@ -3,12 +3,12 @@ const express = require('express')
 const proxy = require('express-http-proxy')
 
 const app = express()
-const port = process.env.NGINX_PORT || 3000
+const port = process.env.NGINX_PORT || 6008
 
 // 后端 API 地址
 const proxyConfig = {
   URL: '127.0.0.1',
-  PORT: process.env.PORT || 3001
+  PORT: process.env.PORT || 6006
 }
 
 // 静态文件服务目录
@@ -25,16 +25,6 @@ app.use(
   })
 );
 
-// 配置代理中间件将CookieCloud请求转发给后端API
-app.use(
-  '/cookiecloud',
-  proxy(`${proxyConfig.URL}:${proxyConfig.PORT}`, {
-    // 路径加上 /cookiecloud 前缀
-    proxyReqPathResolver: (req) => {
-      return `/cookiecloud${req.url}`
-    }
-  })
-);
 
 // 处理根路径的请求
 app.get('/', (req, res) => {

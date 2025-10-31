@@ -45,17 +45,10 @@ const refreshTimers = ref<{ [key: string]: NodeJS.Timeout }>({})
 
 // 仪表板启用配置
 const enableConfig = ref<{ [key: string]: boolean }>({
-  mediaStatistic: true,
   scheduler: false,
-  speed: false,
-  storage: true,
-  weeklyOverview: false,
-  cpu: false,
-  memory: false,
-  network: false,
-  library: true,
-  playing: true,
-  latest: true,
+  cpu: true,
+  memory: true,
+  network: true,
 })
 
 // 仪表板顺序配置
@@ -63,38 +56,6 @@ const orderConfig = ref<{ id: string; key: string }[]>([])
 
 // 仪表板配置
 const dashboardConfigs = ref<DashboardItem[]>([
-  {
-    id: 'storage',
-    name: t('dashboard.storage'),
-    key: '',
-    attrs: {},
-    cols: { cols: 12, md: 4 },
-    elements: [],
-  },
-  {
-    id: 'mediaStatistic',
-    name: t('dashboard.mediaStatistic'),
-    key: '',
-    attrs: {},
-    cols: { cols: 12, md: 8 },
-    elements: [],
-  },
-  {
-    id: 'weeklyOverview',
-    name: t('dashboard.weeklyOverview'),
-    key: '',
-    attrs: {},
-    cols: { cols: 12, md: 4 },
-    elements: [],
-  },
-  {
-    id: 'speed',
-    name: t('dashboard.realTimeSpeed'),
-    key: '',
-    attrs: {},
-    cols: { cols: 12, md: 4 },
-    elements: [],
-  },
   {
     id: 'scheduler',
     name: t('dashboard.scheduler'),
@@ -125,30 +86,6 @@ const dashboardConfigs = ref<DashboardItem[]>([
     key: '',
     attrs: {},
     cols: { cols: 12, md: 6 },
-    elements: [],
-  },
-  {
-    id: 'library',
-    name: t('dashboard.library'),
-    key: '',
-    attrs: {},
-    cols: { cols: 12 },
-    elements: [],
-  },
-  {
-    id: 'playing',
-    name: t('dashboard.playing'),
-    key: '',
-    attrs: {},
-    cols: { cols: 12 },
-    elements: [],
-  },
-  {
-    id: 'latest',
-    name: t('dashboard.latest'),
-    key: '',
-    attrs: {},
-    cols: { cols: 12 },
     elements: [],
   },
 ])
@@ -264,7 +201,7 @@ function buildPluginDashboardId(plugin_id: string, key: string) {
 async function getPluginDashboardMeta() {
   // 只有超级用户才能获取
   if (!superUser) return
-  pluginDashboardMeta.value = await api.get('/plugin/dashboard/meta')
+  pluginDashboardMeta.value = await api.get('/addon/dashboard/meta')
   try {
     if (!isNullOrEmptyObject(pluginDashboardMeta.value)) {
       // 下载插件仪表板配置
@@ -283,7 +220,7 @@ async function getPluginDashboardMeta() {
 // 获取一个插件的仪表板配置项
 async function getPluginDashboard(id: string, key: string) {
   try {
-    const url = key ? `/plugin/dashboard/${id}/${key}` : `/plugin/dashboard/${id}`
+    const url = key ? `/addon/dashboard/${id}/${key}` : `/addon/dashboard/${id}`
     api.get(url).then((res: any) => {
       if (res) {
         // 名称替换为元信息的名称

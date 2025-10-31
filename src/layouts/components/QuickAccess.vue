@@ -76,7 +76,7 @@ const isVisible = computed(() => {
 
 // 处理插件图标加载错误
 function handleIconError(plugin: Plugin) {
-  pluginIconLoadError.value[plugin.id] = true
+  pluginIconLoadError.value[plugin.addon_id] = true
 }
 
 // 处理插件图标加载完成
@@ -91,26 +91,26 @@ async function handleIconLoaded(src: string | undefined, plugin: Plugin) {
       try {
         // 从图片中提取背景色
         const backgroundColor = await getDominantColor(img)
-        pluginBackgroundColors.value[plugin.id] = backgroundColor
+        pluginBackgroundColors.value[plugin.addon_id] = backgroundColor
       } catch (error) {
         // 如果提取失败，使用默认颜色
-        pluginBackgroundColors.value[plugin.id] = '#28A9E1'
+        pluginBackgroundColors.value[plugin.addon_id] = '#28A9E1'
       }
     }
     img.onerror = () => {
       // 如果加载失败，使用默认颜色
-      pluginBackgroundColors.value[plugin.id] = '#28A9E1'
+      pluginBackgroundColors.value[plugin.addon_id] = '#28A9E1'
     }
     img.src = src
   } catch (error) {
     // 如果提取失败，使用默认颜色
-    pluginBackgroundColors.value[plugin.id] = '#28A9E1'
+    pluginBackgroundColors.value[plugin.addon_id] = '#28A9E1'
   }
 }
 
 // 获取插件背景颜色
 function getPluginBackgroundColor(plugin: Plugin): string {
-  return pluginBackgroundColors.value[plugin.id] || '#28A9E1'
+  return pluginBackgroundColors.value[plugin.addon_id] || '#28A9E1'
 }
 
 // 计算整个组件的transform（包含拖动偏移）
@@ -137,16 +137,16 @@ const componentOpacity = computed(() => {
 
 // 计算插件图标路径
 function getPluginIcon(plugin: Plugin): string {
-  if (!plugin.plugin_icon) return getLogoUrl('plugin')
-  if (pluginIconLoadError.value[plugin.id]) return getLogoUrl('plugin')
+  if (!plugin.addon_icon) return getLogoUrl('plugin')
+  if (pluginIconLoadError.value[plugin.addon_id]) return getLogoUrl('plugin')
 
   // 如果是网络图片则使用代理后返回
-  if (plugin?.plugin_icon?.startsWith('http'))
+  if (plugin?.addon_icon?.startsWith('http'))
     return `${import.meta.env.VITE_API_BASE_URL}system/img/1?imgurl=${encodeURIComponent(
-      plugin?.plugin_icon,
+      plugin?.addon_icon,
     )}&cache=true`
 
-  return `./plugin_icon/${plugin?.plugin_icon}`
+  return `./plugin_icon/${plugin?.addon_icon}`
 }
 
 // 获取有详情页面的插件
@@ -155,7 +155,7 @@ async function fetchPluginsWithPage() {
 
   try {
     loading.value = true
-    const allPlugins: Plugin[] = await api.get('plugin/', {
+    const allPlugins: Plugin[] = await api.get('addon/', {
       params: {
         state: 'installed',
       },
@@ -166,7 +166,7 @@ async function fetchPluginsWithPage() {
       .filter(plugin => plugin.has_page)
       .sort((a, b) => {
         // 按插件名称排序
-        return (a.plugin_name || '').localeCompare(b.plugin_name || '')
+        return (a.addon_name || '').localeCompare(b.addon_name || '')
       })
   } catch (error) {
     console.error('获取插件列表失败:', error)
@@ -421,7 +421,7 @@ function handleBackdropClick(event: MouseEvent) {
         <div v-if="recentPlugins.length > 0" class="recent-plugins-row">
           <div
             v-for="plugin in recentPlugins"
-            :key="`recent-${plugin.id}`"
+            :key="`recent-${plugin.addon_id}`"
             class="plugin-item"
             @click="handlePluginClick(plugin)"
           >
@@ -434,7 +434,7 @@ function handleBackdropClick(event: MouseEvent) {
               >
                 <VImg
                   :src="getPluginIcon(plugin)"
-                  :alt="plugin.plugin_name"
+                  :alt="plugin.addon_name"
                   cover
                   @error="handleIconError(plugin)"
                   @load="src => handleIconLoaded(src, plugin)"
@@ -442,7 +442,7 @@ function handleBackdropClick(event: MouseEvent) {
                 />
               </div>
             </VBadge>
-            <div class="plugin-name">{{ plugin.plugin_name }}</div>
+            <div class="plugin-name">{{ plugin.addon_name }}</div>
           </div>
         </div>
 
@@ -460,7 +460,7 @@ function handleBackdropClick(event: MouseEvent) {
           <div class="all-plugins-grid">
             <div
               v-for="plugin in pluginsWithPage"
-              :key="plugin.id"
+              :key="plugin.addon_id"
               class="plugin-item"
               @click="handlePluginClick(plugin)"
             >
@@ -479,7 +479,7 @@ function handleBackdropClick(event: MouseEvent) {
                 >
                   <VImg
                     :src="getPluginIcon(plugin)"
-                    :alt="plugin.plugin_name"
+                    :alt="plugin.addon_name"
                     cover
                     @load="src => handleIconLoaded(src, plugin)"
                     @error="handleIconError(plugin)"
@@ -487,7 +487,7 @@ function handleBackdropClick(event: MouseEvent) {
                   />
                 </div>
               </VBadge>
-              <div class="plugin-name">{{ plugin.plugin_name }}</div>
+              <div class="plugin-name">{{ plugin.addon_name }}</div>
             </div>
           </div>
         </div>

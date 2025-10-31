@@ -187,7 +187,7 @@ function forceScrollToEnd() {
 
 // 拼接全部日志url
 function allLoggingUrl() {
-  return `${import.meta.env.VITE_API_BASE_URL}system/logging?length=-1`
+  return `${import.meta.env.VITE_API_BASE_URL}system/logging2?length=-1`
 }
 
 // 发送消息
@@ -362,7 +362,7 @@ onMounted(() => {
       </VCardItem>
       <VDivider />
       <VCardText>
-        <LoggingView logfile="moviepilot.log" />
+        <LoggingView logfile="mitmpilot.log" />
       </VCardText>
     </VCard>
   </VDialog>

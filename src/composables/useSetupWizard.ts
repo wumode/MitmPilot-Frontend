@@ -39,7 +39,7 @@ export interface WizardData {
     name: string
     enabled: boolean
     config: any
-    switchs: any[]
+    switches: any[]
   }
   preferences: {
     quality: string
@@ -131,7 +131,7 @@ const wizardData = ref<WizardData>({
     name: '',
     enabled: false,
     config: {},
-    switchs: [],
+    switches: [],
   },
   preferences: {
     quality: '4K',
@@ -822,12 +822,6 @@ export function useSetupWizard() {
         case 2:
           await saveStorageSettings()
           break
-        case 3:
-          await saveDownloaderSettings()
-          break
-        case 4:
-          await saveMediaServerSettings()
-          break
         case 5:
           await saveNotificationSettings()
           break
@@ -964,73 +958,20 @@ export function useSetupWizard() {
     }
   }
 
-  // 保存下载器配置
-  async function saveDownloaderSettings() {
-    if (wizardData.value.downloader.type) {
-      try {
-        // 只保存当前选中类型的配置
-        const config = { ...wizardData.value.downloader.config }
-
-        const downloader = {
-          name: wizardData.value.downloader.name,
-          type: wizardData.value.downloader.type,
-          default: true,
-          enabled: true,
-          config: config,
-        }
-
-        await api.post('system/setting/Downloaders', [downloader])
-      } catch (error) {
-        console.error('Save downloader settings failed:', error)
-        $toast.error(t('setupWizard.saveDownloaderSettingsFailed'))
-      }
-    } else {
-      // 没有选择下载器时，清空现有配置
-      console.log('No downloader selected, skipping save')
-    }
-  }
-
-  // 保存媒体服务器配置
-  async function saveMediaServerSettings() {
-    if (wizardData.value.mediaServer.type) {
-      try {
-        // 只保存当前选中类型的配置
-        const config = { ...wizardData.value.mediaServer.config }
-        const sync_libraries = [...(wizardData.value.mediaServer.sync_libraries || [])]
-
-        const mediaServer = {
-          name: wizardData.value.mediaServer.name,
-          type: wizardData.value.mediaServer.type,
-          enabled: true,
-          config: config,
-          sync_libraries: sync_libraries,
-        }
-
-        await api.post('system/setting/MediaServers', [mediaServer])
-      } catch (error) {
-        console.error('Save media server settings failed:', error)
-        $toast.error(t('setupWizard.saveMediaServerSettingsFailed'))
-      }
-    } else {
-      // 没有选择媒体服务器时，清空现有配置
-      console.log('No media server selected, skipping save')
-    }
-  }
-
   // 保存通知配置
   async function saveNotificationSettings() {
     if (wizardData.value.notification.type) {
       try {
         // 只保存当前选中类型的配置
         const config = { ...wizardData.value.notification.config }
-        const switchs = [...(wizardData.value.notification.switchs || [])]
+        const switches = [...(wizardData.value.notification.switches || [])]
 
         const notification = {
           name: wizardData.value.notification.name,
           type: wizardData.value.notification.type,
           enabled: wizardData.value.notification.enabled,
           config: config,
-          switchs: switchs,
+          switches: switches,
         }
 
         await api.post('system/setting/Notifications', [notification])
@@ -1136,37 +1077,6 @@ export function useSetupWizard() {
     }
   }
 
-  // 加载下载器设置
-  async function loadDownloaderSettings() {
-    try {
-      const result: { [key: string]: any } = await api.get('system/setting/Downloaders')
-      if (result.success && result.data?.value && result.data.value.length > 0) {
-        const downloader = result.data.value[0]
-        wizardData.value.downloader.type = downloader.type
-        wizardData.value.downloader.name = downloader.name
-        wizardData.value.downloader.config = downloader.config || {}
-      }
-    } catch (error) {
-      console.log('Load downloader settings failed:', error)
-    }
-  }
-
-  // 加载媒体服务器设置
-  async function loadMediaServerSettings() {
-    try {
-      const result: { [key: string]: any } = await api.get('system/setting/MediaServers')
-      if (result.success && result.data?.value && result.data.value.length > 0) {
-        const mediaServer = result.data.value[0]
-        wizardData.value.mediaServer.type = mediaServer.type
-        wizardData.value.mediaServer.name = mediaServer.name
-        wizardData.value.mediaServer.config = mediaServer.config || {}
-        wizardData.value.mediaServer.sync_libraries = mediaServer.sync_libraries || []
-      }
-    } catch (error) {
-      console.log('Load media server settings failed:', error)
-    }
-  }
-
   // 加载通知设置
   async function loadNotificationSettings() {
     try {
@@ -1177,7 +1087,7 @@ export function useSetupWizard() {
         wizardData.value.notification.name = notification.name
         wizardData.value.notification.enabled = notification.enabled
         wizardData.value.notification.config = notification.config || {}
-        wizardData.value.notification.switchs = notification.switchs || []
+        wizardData.value.notification.switches = notification.switches || []
       }
     } catch (error) {
       console.log('Load notification settings failed:', error)
@@ -1190,8 +1100,6 @@ export function useSetupWizard() {
     try {
       await loadSystemSettings()
       await loadStorageSettings()
-      await loadDownloaderSettings()
-      await loadMediaServerSettings()
       await loadNotificationSettings()
     } finally {
       isLoading.value = false

@@ -450,7 +450,7 @@ onMounted(() => {
                 :append-inner-icon="isNewPasswordVisible ? 'mdi-eye-off-outline' : 'mdi-eye-outline'"
                 clearable
                 :label="t('dialog.userAddEdit.password')"
-                autocomplete=""
+                autocomplete="new-password"
                 prepend-inner-icon="mdi-lock"
                 @click:append-inner="isNewPasswordVisible = !isNewPasswordVisible"
               />

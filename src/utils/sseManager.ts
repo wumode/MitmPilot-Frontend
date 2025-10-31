@@ -1,240 +1,120 @@
+import { useAuthStore } from '@/stores'
+import { fetchEventSource, type EventSourceMessage } from '@microsoft/fetch-event-source'
+
 /**
  * SSE连接管理器
- * 优化后台SSE连接，减少iOS系统杀掉应用的概率
+ * 使用 @microsoft/fetch-event-source 替代原生 EventSource 以支持认证
  */
 export class SSEManager {
-  private eventSource: EventSource | null = null
   private url: string
-  private isBackground = false
+  private listeners: Map<string, (event: EventSourceMessage) => void> = new Map()
+  private abortController: AbortController | null = null
+  private isConnecting = false
   private reconnectTimer: number | null = null
-  private backgroundCloseTimer: number | null = null
-  private listeners: Map<string, (event: MessageEvent) => void> = new Map()
   private options: {
-    backgroundCloseDelay: number
     reconnectDelay: number
     maxReconnectAttempts: number
   }
-  private reconnectAttempts = 0
-  private isConnecting = false
 
   constructor(url: string, options: Partial<typeof SSEManager.prototype.options> = {}) {
     this.url = url
     this.options = {
-      backgroundCloseDelay: 5000, // 5秒后关闭后台连接
-      reconnectDelay: 3000, // 3秒后重连
+      reconnectDelay: 3000,
       maxReconnectAttempts: 3,
       ...options,
     }
-
-    this.setupVisibilityListener()
   }
 
-  private setupVisibilityListener() {
-    document.addEventListener('visibilitychange', () => {
-      if (document.hidden) {
-        this.handleBackground()
-      } else {
-        this.handleForeground()
-      }
-    })
-
-    // 页面卸载时关闭连接
-    window.addEventListener('beforeunload', () => {
-      this.close()
-    })
-  }
-
-  private handleBackground() {
-    this.isBackground = true
-
-    // 延迟关闭SSE连接，避免频繁切换
-    if (this.backgroundCloseTimer) {
-      clearTimeout(this.backgroundCloseTimer)
-    }
-
-    this.backgroundCloseTimer = window.setTimeout(() => {
-      if (this.isBackground && this.eventSource) {
-        this.eventSource.close()
-        this.eventSource = null
-      }
-    }, this.options.backgroundCloseDelay)
-  }
-
-  private handleForeground() {
-    this.isBackground = false
-
-    // 清除后台关闭定时器
-    if (this.backgroundCloseTimer) {
-      clearTimeout(this.backgroundCloseTimer)
-      this.backgroundCloseTimer = null
-    }
-
-    // 只有在有活跃监听器时才重新建立连接
-    if (this.listeners.size > 0 && (!this.eventSource || this.eventSource.readyState === EventSource.CLOSED)) {
-      this.reconnectSSE()
-    }
-  }
-
-  private reconnectSSE(attemptCount = 0) {
-    if (attemptCount >= this.options.maxReconnectAttempts) {
-      return
-    }
-
-    if (this.isConnecting) {
-      return
-    }
-
-    // 如果没有活跃的监听器，不进行重连
-    if (this.listeners.size === 0) {
+  private connect() {
+    if (this.isConnecting || this.abortController) {
       return
     }
 
     this.isConnecting = true
-    this.reconnectAttempts = attemptCount
+    this.abortController = new AbortController()
 
-    try {
-      this.eventSource = new EventSource(this.url)
+    const authStore = useAuthStore()
+    const headers: Record<string, string> = {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache',
+      Connection: 'keep-alive',
+    }
+    if (authStore.token) {
+      headers.Authorization = `Bearer ${authStore.token}`
+    }
 
-      this.eventSource.onopen = () => {
+    fetchEventSource(this.url, {
+      signal: this.abortController.signal,
+      headers,
+      onopen: async response => {
         this.isConnecting = false
-        this.reconnectAttempts = 0
-      }
-
-      this.eventSource.onerror = error => {
-        this.isConnecting = false
-
-        if (this.eventSource?.readyState === EventSource.CLOSED) {
-          // 连接已关闭，尝试重连
-          if (this.reconnectTimer) {
-            clearTimeout(this.reconnectTimer)
-          }
-
-          this.reconnectTimer = window.setTimeout(() => {
-            if (!this.isBackground && this.listeners.size > 0) {
-              this.reconnectSSE(this.reconnectAttempts + 1)
-            }
-          }, this.options.reconnectDelay)
+        if (!response.ok) {
+          this.handleError(new Error(`Failed to connect: ${response.status} ${response.statusText}`))
         }
-      }
-
-      this.eventSource.onmessage = event => {
-        // 分发消息给所有监听器
-        this.listeners.forEach((listener, listenerId) => {
-          try {
-            // 为每个监听器提供独立的错误处理
-            listener(event)
-          } catch (error) {
-            console.error(`SSE: 监听器错误 [${listenerId}]`, error)
-          }
+      },
+      onmessage: event => {
+        this.listeners.forEach(listener => {
+          listener(event)
         })
+      },
+      onclose: () => {
+        this.isConnecting = false
+      },
+      onerror: err => {
+        this.isConnecting = false
+        this.handleError(err)
+        // fetchEventSource has its own retry mechanism, but we might want to stop it
+        // if the error is something like a 401, to prevent infinite loops.
+        // For now, we'll re-throw the error to use its default retry logic.
+        throw err
+      },
+    }).catch(err => {
+      if (err.name !== 'AbortError') {
+        console.error('SSE fetchEventSource failed:', err)
       }
-    } catch (error) {
-      this.isConnecting = false
-
-      // 连接创建失败，尝试重连
-      if (this.reconnectTimer) {
-        clearTimeout(this.reconnectTimer)
-      }
-
-      this.reconnectTimer = window.setTimeout(() => {
-        if (!this.isBackground && this.listeners.size > 0) {
-          this.reconnectSSE(this.reconnectAttempts + 1)
-        }
-      }, this.options.reconnectDelay)
-    }
+    })
   }
 
-  /**
-   * 添加消息监听器
-   */
-  addMessageListener(id: string, listener: (event: MessageEvent) => void) {
+  private handleError(error: Error) {
+    console.error('SSE Error:', error)
+    this.close() // Stop the connection on error
+  }
+
+  addMessageListener(id: string, listener: (event: EventSourceMessage) => void) {
     this.listeners.set(id, listener)
-
-    // 如果还没有连接且不在后台，现在建立连接
-    if (!this.eventSource && !this.isBackground && !this.isConnecting) {
-      this.reconnectSSE()
+    if (!this.abortController) {
+      this.connect()
     }
   }
 
-  /**
-   * 移除消息监听器
-   */
   removeMessageListener(id: string) {
     this.listeners.delete(id)
-
-    // 如果没有监听器了，关闭连接
     if (this.listeners.size === 0) {
       this.close()
     }
   }
 
-  /**
-   * 关闭连接
-   */
   close() {
-    if (this.eventSource) {
-      this.eventSource.close()
-      this.eventSource = null
+    if (this.abortController) {
+      this.abortController.abort()
+      this.abortController = null
     }
-
     if (this.reconnectTimer) {
       clearTimeout(this.reconnectTimer)
       this.reconnectTimer = null
     }
-
-    if (this.backgroundCloseTimer) {
-      clearTimeout(this.backgroundCloseTimer)
-      this.backgroundCloseTimer = null
-    }
-
-    this.listeners.clear()
     this.isConnecting = false
-    this.reconnectAttempts = 0
   }
 
-  /**
-   * 获取连接状态
-   */
-  get readyState(): number {
-    return this.eventSource?.readyState ?? EventSource.CLOSED
-  }
-
-  /**
-   * 获取连接URL
-   */
-  get connectionUrl(): string {
-    return this.url
-  }
-
-  /**
-   * 强制重新连接
-   */
   forceReconnect() {
     this.close()
-    if (!this.isBackground && this.listeners.size > 0) {
-      this.reconnectSSE()
+    if (this.listeners.size > 0) {
+      this.connect()
     }
   }
 
-  /**
-   * 检查是否有活跃的监听器
-   */
   get hasActiveListeners(): boolean {
     return this.listeners.size > 0
-  }
-
-  /**
-   * 获取当前重连次数
-   */
-  get currentReconnectAttempts(): number {
-    return this.reconnectAttempts
-  }
-
-  /**
-   * 检查是否达到最大重连次数
-   */
-  get hasReachedMaxAttempts(): boolean {
-    return this.reconnectAttempts >= this.options.maxReconnectAttempts
   }
 }
 
@@ -244,14 +124,7 @@ export class SSEManager {
 class SSEManagerSingleton {
   private managers: Map<string, SSEManager> = new Map()
 
-  /**
-   * 获取或创建SSE管理器
-   * @param url SSE连接URL
-   * @param options SSE选项
-   * @returns SSE管理器实例
-   */
   getManager(url: string, options?: ConstructorParameters<typeof SSEManager>[1]): SSEManager {
-    // 使用完整的URL作为key，确保不同路径的SSE连接不会复用
     const managerKey = url
     if (!this.managers.has(managerKey)) {
       this.managers.set(managerKey, new SSEManager(url, options))
@@ -259,19 +132,11 @@ class SSEManagerSingleton {
     return this.managers.get(managerKey)!
   }
 
-  /**
-   * 获取或创建独立的SSE管理器（为每个监听器创建独立连接）
-   * @param url SSE连接URL
-   * @param listenerId 监听器ID
-   * @param options SSE选项
-   * @returns SSE管理器实例
-   */
   getIndependentManager(
     url: string,
     listenerId: string,
     options?: ConstructorParameters<typeof SSEManager>[1],
   ): SSEManager {
-    // 使用URL + 监听器ID作为key，确保每个监听器都有独立的连接
     const managerKey = `${url}::${listenerId}`
     if (!this.managers.has(managerKey)) {
       this.managers.set(managerKey, new SSEManager(url, options))
@@ -279,9 +144,6 @@ class SSEManagerSingleton {
     return this.managers.get(managerKey)!
   }
 
-  /**
-   * 关闭指定URL的管理器
-   */
   closeManager(url: string) {
     const manager = this.managers.get(url)
     if (manager) {
@@ -290,9 +152,6 @@ class SSEManagerSingleton {
     }
   }
 
-  /**
-   * 关闭所有管理器
-   */
   closeAllManagers() {
     this.managers.forEach(manager => manager.close())
     this.managers.clear()

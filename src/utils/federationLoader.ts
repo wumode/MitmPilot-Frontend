@@ -65,7 +65,7 @@ export async function loadRemoteComponent(id: string, componentName: string = 'P
  */
 async function fetchRemoteModules(): Promise<RemoteModule[]> {
   try {
-    const response = await api.get('plugin/remotes?token=moviepilot', {
+    const response = await api.get('addon/remotes?token=mitmpilot', {
       signal: federationController.signal,
     })
     return (response as any) || []

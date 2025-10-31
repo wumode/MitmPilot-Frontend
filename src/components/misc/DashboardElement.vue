@@ -9,9 +9,6 @@ import AnalyticsWeeklyOverview from '@/views/dashboard/AnalyticsWeeklyOverview.v
 import AnalyticsCpu from '@/views/dashboard/AnalyticsCpu.vue'
 import AnalyticsMemory from '@/views/dashboard/AnalyticsMemory.vue'
 import AnalyticsNetwork from '@/views/dashboard/AnalyticsNetwork.vue'
-import MediaServerLatest from '@/views/dashboard/MediaServerLatest.vue'
-import MediaServerLibrary from '@/views/dashboard/MediaServerLibrary.vue'
-import MediaServerPlaying from '@/views/dashboard/MediaServerPlaying.vue'
 import DashboardRender from '@/components/render/DashboardRender.vue'
 import { isNullOrEmptyObject } from '@/@core/utils'
 import { loadRemoteComponent } from '@/utils/federationLoader'
@@ -83,9 +80,6 @@ onUnmounted(() => {
   <AnalyticsCpu v-else-if="config?.id === 'cpu'" :allowRefresh="props.allowRefresh" />
   <AnalyticsMemory v-else-if="config?.id === 'memory'" :allowRefresh="props.allowRefresh" />
   <AnalyticsNetwork v-else-if="config?.id === 'network'" :allowRefresh="props.allowRefresh" />
-  <MediaServerLibrary v-else-if="config?.id === 'library'" />
-  <MediaServerPlaying v-else-if="config?.id === 'playing'" />
-  <MediaServerLatest v-else-if="config?.id === 'latest'" />
   <!-- 插件仪表板 -->
   <template v-else-if="!isNullOrEmptyObject(props.config)">
     <!-- Vue 渲染模式 -->

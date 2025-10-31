@@ -41,9 +41,9 @@ const progressText = ref('')
 
 // 获取当前插件的标签
 const pluginLabels = computed(() => {
-  if (!props.plugin?.plugin_label) return []
+  if (!props.plugin?.addon_label) return []
 
-  return props.plugin.plugin_label
+  return props.plugin.addon_label
     .split(',')
     .map(tag => tag.trim())
     .filter(tag => tag.length > 0)
@@ -75,11 +75,11 @@ async function installPlugin() {
     // 显示等待提示框
     progressDialog.value = true
     progressText.value = t('plugin.installing', {
-      name: props.plugin?.plugin_name,
-      version: props?.plugin?.plugin_version,
+      name: props.plugin?.addon_name,
+      version: props?.plugin?.addon_version,
     })
 
-    const result: { [key: string]: any } = await api.get(`plugin/install/${props.plugin?.id}`, {
+    const result: { [key: string]: any } = await api.get(`addon/install/${props.plugin?.addon_id}`, {
       params: {
         repo_url: props.plugin?.repo_url,
         force: props.plugin?.has_update,
@@ -90,12 +90,12 @@ async function installPlugin() {
     progressDialog.value = false
 
     if (result.success) {
-      $toast.success(t('plugin.installSuccess', { name: props.plugin?.plugin_name }))
+      $toast.success(t('plugin.installSuccess', { name: props.plugin?.addon_name }))
       detailDialog.value = false
       // 通知父组件刷新
       emit('install')
     } else {
-      $toast.error(t('plugin.installFailed', { name: props.plugin?.plugin_name, message: result.message }))
+      $toast.error(t('plugin.installFailed', { name: props.plugin?.addon_name, message: result.message }))
     }
   } catch (error) {
     console.error(error)
@@ -106,12 +106,12 @@ async function installPlugin() {
 const iconPath: Ref<string> = computed(() => {
   if (imageLoadError.value) return getLogoUrl('plugin')
   // 如果是网络图片则使用代理后返回
-  if (props.plugin?.plugin_icon?.startsWith('http'))
+  if (props.plugin?.addon_icon?.startsWith('http'))
     return `${import.meta.env.VITE_API_BASE_URL}system/img/1?imgurl=${encodeURIComponent(
-      props.plugin?.plugin_icon,
+      props.plugin?.addon_icon,
     )}&cache=true`
 
-  return `./plugin_icon/${props.plugin?.plugin_icon}`
+  return `./plugin_icon/${props.plugin?.addon_icon}`
 })
 
 // 访问插件页面
@@ -187,17 +187,17 @@ const dropdownItems = ref([
               <VCardTitle
                 class="text-white px-2 pb-0 text-lg text-shadow whitespace-nowrap overflow-hidden text-ellipsis"
               >
-                {{ props.plugin?.plugin_name }}
-                <span class="text-sm mt-1 text-gray-200"> v{{ props.plugin?.plugin_version }} </span>
+                {{ props.plugin?.addon_name }}
+                <span class="text-sm mt-1 text-gray-200"> v{{ props.plugin?.addon_version }} </span>
               </VCardTitle>
             </VCardText>
             <div class="relative flex flex-row items-start px-2 justify-between grow">
               <div class="relative flex-1 min-w-0">
                 <div
                   class="text-white text-sm px-2 py-1 text-shadow overflow-hidden ..."
-                  :class="{ 'line-clamp-3': !props.plugin?.plugin_label, 'line-clamp-2': props.plugin?.plugin_label }"
+                  :class="{ 'line-clamp-3': !props.plugin?.addon_label, 'line-clamp-2': props.plugin?.addon_label }"
                 >
-                  {{ props.plugin?.plugin_desc }}
+                  {{ props.plugin?.addon_desc }}
                 </div>
                 <!-- 插件标签 -->
                 <div v-if="pluginLabels.length > 0" class="plugin-app-card__tags-section px-2">
@@ -240,7 +240,7 @@ const dropdownItems = ref([
                   target="_blank"
                   @click.stop
                 >
-                  {{ props.plugin?.plugin_author }}
+                  {{ props.plugin?.addon_author }}
                 </a>
               </div>
               <div v-if="props.count" class="ms-2 flex-shrink-0 download-count align-middle items-center">
@@ -271,7 +271,7 @@ const dropdownItems = ref([
     <ProgressDialog v-if="progressDialog" v-model="progressDialog" :text="progressText" />
     <!-- 更新日志 -->
     <VDialog v-if="releaseDialog" v-model="releaseDialog" width="600" scrollable>
-      <VCard :title="t('plugin.updateHistoryTitle', { name: props.plugin?.plugin_name })">
+      <VCard :title="t('plugin.updateHistoryTitle', { name: props.plugin?.addon_name })">
         <VDialogCloseBtn @click="releaseDialog = false" />
         <VDivider />
         <VersionHistory :history="props.plugin?.history" />
@@ -299,25 +299,25 @@ const dropdownItems = ref([
               <div class="flex-grow">
                 <VCardItem>
                   <VCardTitle class="text-center text-md-left">
-                    {{ props.plugin?.plugin_name }}
+                    {{ props.plugin?.addon_name }}
                   </VCardTitle>
                   <VCardSubtitle
                     class="text-center text-md-left break-words whitespace-break-spaces line-clamp-4 overflow-hidden text-ellipsis ..."
                   >
-                    {{ props.plugin?.plugin_desc }}
+                    {{ props.plugin?.addon_desc }}
                   </VCardSubtitle>
                   <VList lines="one">
                     <VListItem class="ps-0">
                       <VListItemTitle class="text-center text-md-left">
                         <span class="font-weight-medium">{{ t('common.version') }}：</span>
-                        <span class="text-body-1"> v{{ props.plugin?.plugin_version }}</span>
+                        <span class="text-body-1"> v{{ props.plugin?.addon_version }}</span>
                       </VListItemTitle>
                     </VListItem>
                     <VListItem class="ps-0">
                       <VListItemTitle class="text-center text-md-left">
                         <span class="font-weight-medium">{{ t('common.author') }}：</span>
                         <span class="text-body-1 cursor-pointer" @click="visitPluginPage">
-                          {{ props.plugin?.plugin_author }}
+                          {{ props.plugin?.addon_author }}
                         </span>
                       </VListItemTitle>
                     </VListItem>

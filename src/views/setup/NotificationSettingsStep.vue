@@ -8,14 +8,8 @@ const { wizardData, selectNotification, validationErrors } = useSetupWizard()
 
 // 消息类型下拉字典
 const notificationTypes = [
-  { value: '资源下载', title: t('notificationSwitch.resourceDownload') },
-  { value: '整理入库', title: t('notificationSwitch.organize') },
-  { value: '订阅', title: t('notificationSwitch.subscribe') },
-  { value: '站点', title: t('notificationSwitch.site') },
-  { value: '媒体服务器', title: t('notificationSwitch.mediaServer') },
-  { value: '手动处理', title: t('notificationSwitch.manual') },
-  { value: '插件', title: t('notificationSwitch.plugin') },
-  { value: '其它', title: t('notificationSwitch.other') },
+  { value: 'Addon', title: t('notificationSwitch.addon') },
+  { value: 'Other', title: t('notificationSwitch.other') },
 ]
 </script>
 
@@ -129,7 +123,7 @@ const notificationTypes = [
                 <VRow>
                   <VCol cols="12">
                     <VAutocomplete
-                      v-model="wizardData.notification.switchs"
+                      v-model="wizardData.notification.switches"
                       :items="notificationTypes"
                       :label="t('notification.type')"
                       :hint="t('notification.typeHint')"

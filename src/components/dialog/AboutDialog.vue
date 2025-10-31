@@ -43,14 +43,6 @@ const uniqueSupportingSites = computed(() => {
   return Array.from(sitesMap.values())
 })
 
-// 显示的支持站点（折叠时只显示前5个）
-const displayedSites = computed(() => {
-  if (sitesExpanded.value) {
-    return uniqueSupportingSites.value
-  }
-  return uniqueSupportingSites.value.slice(0, 5)
-})
-
 // 变更日志对话框
 const releaseDialog = ref(false)
 
@@ -95,15 +87,6 @@ async function queryAllRelease() {
   }
 }
 
-// 查询支持站点
-async function querySupportingSites() {
-  try {
-    supportingSites.value = await api.get('site/supporting')
-  } catch (error) {
-    console.log(error)
-  }
-}
-
 // 切换站点列表展开状态
 function toggleSitesExpanded() {
   sitesExpanded.value = !sitesExpanded.value
@@ -118,7 +101,6 @@ function releaseTime(releaseDate: string) {
 onMounted(() => {
   querySystemEnv()
   queryAllRelease()
-  querySupportingSites()
 })
 </script>
 
@@ -215,36 +197,6 @@ onMounted(() => {
                       <span class="flex-grow undefined">
                         <code>{{ systemEnv.TZ }}</code>
                       </span>
-                    </dd>
-                  </div>
-                </div>
-                <div>
-                  <div class="max-w-6xl py-4 sm:grid sm:grid-cols-3 sm:gap-4">
-                    <dt class="block text-sm font-bold">{{ t('setting.about.supportingSites') }}</dt>
-                    <dd class="flex text-sm sm:col-span-2 sm:mt-0">
-                      <div class="flex flex-col gap-2">
-                        <div class="flex flex-wrap gap-2 mt-1 ms-1">
-                          <VChip v-for="site in displayedSites" :key="site.name" variant="outlined" size="small">
-                            <span class="truncate max-w-32">{{ site.name }}</span>
-                          </VChip>
-                          <VChip
-                            v-if="!sitesExpanded && uniqueSupportingSites.length > 5"
-                            variant="tonal"
-                            size="small"
-                            @click="toggleSitesExpanded"
-                          >
-                            <span> {{ uniqueSupportingSites.length }}+ ...</span>
-                          </VChip>
-                          <VChip
-                            v-if="sitesExpanded && uniqueSupportingSites.length > 5"
-                            variant="tonal"
-                            size="small"
-                            @click="toggleSitesExpanded"
-                          >
-                            <span>< {{ t('setting.about.collapse') }}</span>
-                          </VChip>
-                        </div>
-                      </div>
                     </dd>
                   </div>
                 </div>

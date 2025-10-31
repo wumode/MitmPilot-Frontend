@@ -64,35 +64,11 @@ const editorContent = ref('')
 // 消息类型开关
 const notificationSwitchs = ref<NotificationSwitchConf[]>([
   {
-    type: '资源下载',
-    action: 'all',
-  },
-  {
-    type: '整理入库',
-    action: 'all',
-  },
-  {
-    type: '订阅',
-    action: 'all',
-  },
-  {
-    type: '站点',
+    type: 'Addon',
     action: 'admin',
   },
   {
-    type: '媒体服务器',
-    action: 'admin',
-  },
-  {
-    type: '手动处理',
-    action: 'admin',
-  },
-  {
-    type: '插件',
-    action: 'admin',
-  },
-  {
-    type: '其它',
+    type: 'Other',
     action: 'admin',
   },
 ])
@@ -213,7 +189,7 @@ function changNotificationSetting(notification: NotificationConf, name: string) 
 // 加载消息类型开关
 async function loadNotificationSwitchs() {
   try {
-    const result: { [key: string]: any } = await api.get('system/setting/NotificationSwitchs')
+    const result: { [key: string]: any } = await api.get('system/setting/NotificationSwitches')
     if (result.data?.value && result.data?.value.length > 0) notificationSwitchs.value = result.data?.value
   } catch (error) {
     console.log(error)
@@ -224,7 +200,7 @@ async function loadNotificationSwitchs() {
 async function saveNotificationSwitchs() {
   try {
     const result: { [key: string]: any } = await api.post(
-      'system/setting/NotificationSwitchs',
+      'system/setting/NotificationSwitches',
       notificationSwitchs.value,
     )
     if (result.success) $toast.success(t('setting.notification.switchSaveSuccess'))
@@ -285,23 +261,8 @@ onMounted(() => {
                 <VIcon icon="mdi-plus" />
                 <VMenu :activator="'parent'" :close-on-content-click="true">
                   <VList>
-                    <VListItem @click="addNotification('wechat')">
-                      <VListItemTitle>{{ t('setting.notification.wechat') }}</VListItemTitle>
-                    </VListItem>
                     <VListItem @click="addNotification('telegram')">
                       <VListItemTitle>{{ t('setting.notification.telegram') }}</VListItemTitle>
-                    </VListItem>
-                    <VListItem @click="addNotification('slack')">
-                      <VListItemTitle>{{ t('setting.notification.slack') }}</VListItemTitle>
-                    </VListItem>
-                    <VListItem @click="addNotification('synologychat')">
-                      <VListItemTitle>{{ t('setting.notification.synologyChat') }}</VListItemTitle>
-                    </VListItem>
-                    <VListItem @click="addNotification('vocechat')">
-                      <VListItemTitle>{{ t('setting.notification.voceChat') }}</VListItemTitle>
-                    </VListItem>
-                    <VListItem @click="addNotification('webpush')">
-                      <VListItemTitle>{{ t('setting.notification.webPush') }}</VListItemTitle>
                     </VListItem>
                     <VListItem @click="addNotification('custom')">
                       <VListItemTitle>{{ t('setting.system.custom') }}</VListItemTitle>

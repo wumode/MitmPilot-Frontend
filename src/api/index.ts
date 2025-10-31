@@ -7,6 +7,7 @@ import { useGlobalOfflineStatus } from '@/composables/useOfflineStatus'
 // 创建axios实例
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL,
+  withCredentials: true,
 })
 
 // 声明全局变量类型
@@ -74,7 +75,7 @@ api.interceptors.response.use(
       }
       // 其他网络错误
       return Promise.reject(new Error(error.message || 'Network error'))
-    } else if (error.response.status === 403) {
+    } else if (error.response.status === 401) {
       // 认证 Store
       const authStore = useAuthStore()
       // 清除登录状态信息

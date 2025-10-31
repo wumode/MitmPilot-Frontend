@@ -601,25 +601,25 @@ export interface NotExistMediaInfo {
 
 // 插件
 export interface Plugin {
-  id: string
+  addon_id: string
   // 插件名称
-  plugin_name: string
+  addon_name: string
   // 插件描述
-  plugin_desc?: string
+  addon_desc?: string
   // 插件图标
-  plugin_icon?: string
+  addon_icon?: string
   // 插件标签，多个以,分隔
-  plugin_label?: string
+  addon_label?: string
   // 插件版本
-  plugin_version?: string
+  addon_version?: string
   // 插件作者
-  plugin_author?: string
+  addon_author?: string
   // 作者主页
   author_url?: string
   // 插件配置项ID前缀
-  plugin_config_prefix?: string
+  addon_config_prefix?: string
   // 加载顺序
-  plugin_order?: number
+  addon_order?: number
   // 可使用的用户级别
   auth_level?: number
   // 是否已安装
@@ -1077,7 +1077,7 @@ export interface NotificationConf {
   // 配置
   config: { [key: string]: any }
   // 场景开关
-  switchs?: string[]
+  switches?: string[]
   // 是否启用
   enabled: boolean
 }

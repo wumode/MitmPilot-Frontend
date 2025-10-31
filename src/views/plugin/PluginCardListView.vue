@@ -135,7 +135,7 @@ const dataList = ref<Plugin[]>([])
 
 // 计算已安装插件的名称列表
 const installedPluginNames = computed(() => {
-  return dataList.value.map(item => item.plugin_name)
+  return dataList.value.map(item => item.addon_name)
 })
 
 // 过滤后的已安装插件列表
@@ -264,7 +264,7 @@ const getFilteredFolderPlugins = (folderName: string) => {
   // 获取文件夹内的插件并应用筛选条件
   const folderPlugins: Plugin[] = []
   folderPluginIds.forEach((pluginId: string) => {
-    const plugin = dataList.value.find(p => p.id === pluginId)
+    const plugin = dataList.value.find(p => p.addon_id === pluginId)
     if (plugin) {
       folderPlugins.push(plugin)
     }
@@ -279,13 +279,13 @@ const getFilteredFolderPlugins = (folderName: string) => {
     if (hasUpdateFilter.value) return plugin.has_update
     if (enabledFilter.value) return plugin.state
     if (installedFilter.value) {
-      return plugin.plugin_name?.toLowerCase().includes((installedFilter.value as string).toLowerCase())
+      return plugin.addon_name?.toLowerCase().includes((installedFilter.value as string).toLowerCase())
     }
     if (installedFilter.value) {
-      return plugin.plugin_name?.toLowerCase().includes((installedFilter.value as string).toLowerCase())
+      return plugin.addon_name?.toLowerCase().includes((installedFilter.value as string).toLowerCase())
     }
     if (installedFilter.value) {
-      return plugin.plugin_name?.toLowerCase().includes((installedFilter.value as string).toLowerCase())
+      return plugin.addon_name?.toLowerCase().includes((installedFilter.value as string).toLowerCase())
     }
     return true
   })
@@ -300,7 +300,7 @@ const displayedPlugins = computed(() => {
       const plugins = Array.isArray(folderData) ? folderData : folderData.plugins || []
       plugins.forEach((pid: string) => folderedPluginIds.add(pid))
     })
-    return filteredDataList.value.filter(plugin => !folderedPluginIds.has(plugin.id))
+    return filteredDataList.value.filter(plugin => !folderedPluginIds.has(plugin.addon_id))
   } else {
     // 文件夹内：返回筛选后的插件
     return getFilteredFolderPlugins(currentFolder.value)
@@ -383,10 +383,10 @@ function updateMixedSortList() {
 
     // 添加插件项目
     displayedPlugins.value.forEach(plugin => {
-      const orderItem = orderConfig.value.find((item: any) => item.type === 'plugin' && item.id === plugin.id)
+      const orderItem = orderConfig.value.find((item: any) => item.type === 'plugin' && item.id === plugin.addon_id)
       allItems.push({
         type: 'plugin',
-        id: plugin.id || '',
+        id: plugin.addon_id || '',
         data: plugin,
         order: orderItem?.order ?? 999,
       })
@@ -470,8 +470,8 @@ function sortPluginOrder() {
     return
   }
   dataList.value.sort((a, b) => {
-    const aIndex = orderConfig.value.findIndex((item: { id: string }) => item.id === a.id)
-    const bIndex = orderConfig.value.findIndex((item: { id: string }) => item.id === b.id)
+    const aIndex = orderConfig.value.findIndex((item: { id: string }) => item.id === a.addon_id)
+    const bIndex = orderConfig.value.findIndex((item: { id: string }) => item.id === b.addon_id)
     return (aIndex === -1 ? 999 : aIndex) - (bIndex === -1 ? 999 : bIndex)
   })
 }
@@ -512,8 +512,8 @@ async function saveMixedSortOrder() {
     Object.values(pluginFolders.value).forEach(folderData => {
       const plugins = Array.isArray(folderData) ? folderData : folderData.plugins || []
       plugins.forEach((id: string) => {
-        const folderPlugin = dataList.value.find(p => p.id === id)
-        if (folderPlugin && !newPluginOrder.find(p => p.id === id)) {
+        const folderPlugin = dataList.value.find(p => p.addon_id === id)
+        if (folderPlugin && !newPluginOrder.find(p => p.addon_id === id)) {
           newPluginOrder.push(folderPlugin)
         }
       })
@@ -554,7 +554,7 @@ async function saveFolderPluginOrder() {
     // 更新文件夹内插件顺序
     const folderData = pluginFolders.value[currentFolder.value]
     if (folderData) {
-      const newPluginIds = draggableFolderPlugins.value.map(plugin => plugin.id)
+      const newPluginIds = draggableFolderPlugins.value.map(plugin => plugin.addon_id)
 
       if (Array.isArray(folderData)) {
         // 旧格式，直接替换数组
@@ -572,7 +572,7 @@ async function saveFolderPluginOrder() {
 
       // 为文件夹内的插件分配连续的order值
       newPluginIds.forEach((pluginId, index) => {
-        const existingItem = orderConfig.value.find((item: any) => item.type === 'plugin' && item.id === pluginId)
+        const existingItem = orderConfig.value.find((item: any) => item.type === 'plugin' && item.addon_id === pluginId)
         if (existingItem) {
           existingItem.order = folderGlobalOrder + 0.1 + index * 0.01 // 使用小数确保在文件夹后面
         } else {
@@ -606,8 +606,8 @@ function initOptions(item: Plugin) {
   const optionMutipleValue = (options: Array<string>, value: string | undefined) => {
     value && value.split(',').forEach(v => !options.includes(v) && options.push(v))
   }
-  optionValue(authorFilterOptions.value, item.plugin_author)
-  optionMutipleValue(labelFilterOptions.value, item.plugin_label)
+  optionValue(authorFilterOptions.value, item.addon_author)
+  optionMutipleValue(labelFilterOptions.value, item.addon_label)
   optionValue(repoFilterOptions.value, handleRepoUrl(item.repo_url))
 }
 
@@ -621,9 +621,9 @@ async function installPlugin(item: Plugin) {
   try {
     // 显示等待提示框
     progressDialog.value = true
-    progressText.value = t('plugin.installing', { name: item?.plugin_name, version: item?.plugin_version })
+    progressText.value = t('plugin.installing', { name: item?.addon_name, version: item?.addon_version })
 
-    const result: { [key: string]: any } = await api.get(`plugin/install/${item?.id}`, {
+    const result: { [key: string]: any } = await api.get(`addon/install/${item?.addon_id}`, {
       params: {
         repo_url: item?.repo_url,
         force: item?.has_update,
@@ -634,7 +634,7 @@ async function installPlugin(item: Plugin) {
     progressDialog.value = false
 
     if (result.success) {
-      $toast.success(t('plugin.installSuccess', { name: item?.plugin_name }))
+      $toast.success(t('plugin.installSuccess', { name: item?.addon_name }))
       // 清空过滤条件
       hasUpdateFilter.value = false
       enabledFilter.value = false
@@ -642,7 +642,7 @@ async function installPlugin(item: Plugin) {
       // 刷新
       refreshData()
     } else {
-      $toast.error(t('plugin.installFailed', { name: item?.plugin_name, message: result.message }))
+      $toast.error(t('plugin.installFailed', { name: item?.addon_name, message: result.message }))
     }
   } catch (error) {
     console.error(error)
@@ -654,7 +654,7 @@ function openPlugin(item: Plugin) {
   // 如果是已安装插件则打开插件详情
   if (item.installed === true) {
     // 标记插件动作
-    pluginActions.value[item.id || '0'] = true
+    pluginActions.value[item.addon_id || '0'] = true
   } else {
     // 如果是未安装插件则安装
     installPlugin(item)
@@ -669,18 +669,18 @@ function closeSearchDialog() {
 
 // 插件图标加载错误
 function pluginIconError(item: Plugin) {
-  pluginIconLoaded.value[item.id || '0'] = false
+  pluginIconLoaded.value[item.addon_id || '0'] = false
 }
 
 // 插件图标地址
 function pluginIcon(item: Plugin) {
   // 如果图片加载错误
-  if (pluginIconLoaded.value[item.id || '0'] === false) return getLogoUrl('plugin')
+  if (pluginIconLoaded.value[item.addon_id || '0'] === false) return getLogoUrl('plugin')
   // 如果是网络图片则使用代理后返回
-  if (item?.plugin_icon?.startsWith('http'))
-    return `${import.meta.env.VITE_API_BASE_URL}system/img/1?imgurl=${encodeURIComponent(item?.plugin_icon)}&cache=true`
+  if (item?.addon_icon?.startsWith('http'))
+    return `${import.meta.env.VITE_API_BASE_URL}system/img/1?imgurl=${encodeURIComponent(item?.addon_icon)}&cache=true`
 
-  return `./plugin_icon/${item?.plugin_icon}`
+  return `./plugin_icon/${item?.addon_icon}`
 }
 
 // 过滤插件
@@ -689,8 +689,8 @@ const filterPlugins = computed(() => {
   return all_list.filter((item: Plugin) => {
     // 需要忽略大小写
     return (
-      item.plugin_name?.toLowerCase().includes(keyword.value.toLowerCase()) ||
-      item.plugin_desc?.toLowerCase().includes(keyword.value.toLowerCase()) ||
+      item.addon_name?.toLowerCase().includes(keyword.value.toLowerCase()) ||
+      item.addon_desc?.toLowerCase().includes(keyword.value.toLowerCase()) ||
       !keyword
     )
   })
@@ -700,7 +700,7 @@ const filterPlugins = computed(() => {
 async function fetchInstalledPlugins() {
   try {
     loading.value = true
-    dataList.value = await api.get('plugin/', {
+    dataList.value = await api.get('addon/', {
       params: {
         state: 'installed',
       },
@@ -718,7 +718,7 @@ async function fetchInstalledPlugins() {
 async function fetchUninstalledPlugins(force: boolean = false) {
   try {
     loading.value = true
-    uninstalledList.value = await api.get('plugin/', {
+    uninstalledList.value = await api.get('addon/', {
       params: {
         state: 'market',
         force: force,
@@ -727,7 +727,7 @@ async function fetchUninstalledPlugins(force: boolean = false) {
     // 设置更新状态
     for (const uninstalled of uninstalledList.value) {
       for (const data of dataList.value) {
-        if (uninstalled.id === data.id) {
+        if (uninstalled.addon_id === data.addon_id) {
           data.has_update = true
           data.repo_url = uninstalled.repo_url
           data.history = uninstalled.history
@@ -751,7 +751,7 @@ async function fetchUninstalledPlugins(force: boolean = false) {
 // 加载插件统计数据
 async function getPluginStatistics() {
   try {
-    PluginStatistics.value = await api.get('plugin/statistic')
+    PluginStatistics.value = await api.get('addon/statistic')
   } catch (error) {
     console.error(error)
   }
@@ -781,9 +781,9 @@ watch([marketList, filterForm, activeSort], () => {
   marketList.value.forEach(value => {
     if (value) {
       if (
-        filterText(filterForm.name, `${value.plugin_name} ${value.plugin_desc}`) &&
-        match(filterForm.author, value.plugin_author) &&
-        matchMultiple(filterForm.label, value.plugin_label) &&
+        filterText(filterForm.name, `${value.addon_name} ${value.addon_desc}`) &&
+        match(filterForm.author, value.addon_author) &&
+        matchMultiple(filterForm.label, value.addon_label) &&
         match(filterForm.repo, handleRepoUrl(value.repo_url))
       ) {
         sortedUninstalledList.value.push(value)
@@ -795,7 +795,7 @@ watch([marketList, filterForm, activeSort], () => {
   if (!isNullOrEmptyObject(PluginStatistics.value)) {
     if (!activeSort.value || activeSort.value === 'count') {
       sortedUninstalledList.value = sortedUninstalledList.value.sort((a, b) => {
-        return PluginStatistics.value[b.id || '0'] - PluginStatistics.value[a.id || '0']
+        return PluginStatistics.value[b.addon_id || '0'] - PluginStatistics.value[a.addon_id || '0']
       })
     } else if (activeSort.value) {
       sortedUninstalledList.value = sortedUninstalledList.value.sort((a: any, b: any) => {
@@ -856,7 +856,7 @@ watch([dataList, installedFilter, hasUpdateFilter, enabledFilter], () => {
     if (hasUpdateFilter.value) return item.has_update
     if (enabledFilter.value) return item.state
     if (installedFilter.value) {
-      return item.plugin_name?.toLowerCase().includes((installedFilter.value as string).toLowerCase())
+      return item.addon_name?.toLowerCase().includes((installedFilter.value as string).toLowerCase())
     }
     return true
   })
@@ -879,7 +879,7 @@ onMounted(async () => {
   getPluginStatistics()
   if (activeTab.value != 'market' && pluginId.value) {
     // 找到这个插件
-    const plugin = dataList.value.find(item => item.id === pluginId.value)
+    const plugin = dataList.value.find(item => item.addon_id === pluginId.value)
     if (plugin) {
       plugin.page_open = true
     }
@@ -897,7 +897,7 @@ useDynamicButton({
 // 获取插件文件夹配置
 async function loadPluginFolders() {
   try {
-    const response = await api.get('plugin/folders')
+    const response = await api.get('addon/folders')
     const foldersData: any = response && typeof response === 'object' ? response : {}
 
     // 处理旧格式兼容性（array）和新格式（object with config）
@@ -969,7 +969,7 @@ async function savePluginFolders() {
       }
     })
 
-    await api.post('plugin/folders', foldersToSave)
+    await api.post('addon/folders', foldersToSave)
   } catch (error) {
     throw error
   }
@@ -1173,7 +1173,7 @@ async function handleDropToFolder(event: DragEvent, folderName: string) {
     }
 
     // 验证插件ID
-    const plugin = filteredDataList.value.find(p => p.id === pluginId)
+    const plugin = filteredDataList.value.find(p => p.addon_id === pluginId)
 
     if (!plugin) {
       return
@@ -1253,8 +1253,8 @@ function onDragStartPlugin(evt: any) {
   if (oldIndex !== undefined) {
     if (currentFolder.value) {
       const plugin = draggableFolderPlugins.value[oldIndex]
-      if (plugin && plugin.id) {
-        currentDraggedPluginId.value = plugin.id
+      if (plugin && plugin.addon_id) {
+        currentDraggedPluginId.value = plugin.addon_id
         return
       }
     } else {
@@ -1507,7 +1507,11 @@ function onDragStartPlugin(evt: any) {
                   v-for="(data, index) in displayUninstalledList"
                   :key="`${data.id}_v${data.plugin_version}_${index}`"
                 >
-                  <PluginAppCard :plugin="data" :count="PluginStatistics[data.id || '0']" @install="pluginInstalled" />
+                  <PluginAppCard
+                    :plugin="data"
+                    :count="PluginStatistics[data.addon_id || '0']"
+                    @install="pluginInstalled"
+                  />
                 </template>
               </div>
             </VInfiniteScroll>
@@ -1587,12 +1591,12 @@ function onDragStartPlugin(evt: any) {
                 </VAvatar>
               </template>
               <VListItemTitle>
-                {{ item.plugin_name }}<span class="text-sm ms-2 mt-1 text-gray-500">v{{ item?.plugin_version }}</span>
+                {{ item.addon_name }}<span class="text-sm ms-2 mt-1 text-gray-500">v{{ item?.addon_version }}</span>
                 <VIcon v-if="item.installed" color="success" icon="mdi-check-circle" class="ms-2" size="small" />
               </VListItemTitle>
               <VListItemSubtitle>
                 <VChip
-                  v-for="label in pluginLabels(item.plugin_label)"
+                  v-for="label in pluginLabels(item.addon_label)"
                   variant="tonal"
                   size="small"
                   class="me-1 my-1"
@@ -1601,7 +1605,7 @@ function onDragStartPlugin(evt: any) {
                 >
                   {{ label }}
                 </VChip>
-                {{ item.plugin_desc }}
+                {{ item.addon_desc }}
               </VListItemSubtitle>
             </VListItem>
           </template>

@@ -4,7 +4,6 @@ import router from '@/router'
 import avatar1 from '@images/avatars/avatar-1.png'
 import api from '@/api'
 import ProgressDialog from '@/components/dialog/ProgressDialog.vue'
-import UserAuthDialog from '@/components/dialog/UserAuthDialog.vue'
 import AboutDialog from '@/components/dialog/AboutDialog.vue'
 import { useAuthStore, useUserStore, useGlobalSettingsStore } from '@/stores'
 import { useI18n } from 'vue-i18n'
@@ -33,9 +32,6 @@ const $toast = useToast()
 
 // 进度框
 const progressDialog = ref(false)
-
-// 站点认证对话框
-const siteAuthDialog = ref(false)
 
 // 自定义CSS弹窗
 const cssDialog = ref(false)
@@ -206,20 +202,9 @@ async function showRestartDialog() {
   await restart()
 }
 
-// 显示站点认证对话框
-function showSiteAuthDialog() {
-  siteAuthDialog.value = true
-}
-
 // 显示关于对话框
 function showAboutDialog() {
   aboutDialog.value = true
-}
-
-// 用户站点认证成功
-function siteAuthDone() {
-  siteAuthDialog.value = false
-  logout()
 }
 
 // 从用户 Store中获取信息
@@ -538,14 +523,6 @@ onUnmounted(() => {
             <VListItemTitle>{{ isAdvancedMode ? t('user.systemSettings') : t('user.wizardSettings') }}</VListItemTitle>
           </VListItem>
 
-          <!-- 👉 Site Auth -->
-          <VListItem v-if="userLevel < 2 && superUser" link @click="showSiteAuthDialog" class="mb-1 rounded-lg" hover>
-            <template #prepend>
-              <VIcon icon="mdi-lock-check-outline" />
-            </template>
-            <VListItemTitle>{{ t('user.siteAuth') }}</VListItemTitle>
-          </VListItem>
-
           <!-- 👉 主题设置 - 使用嵌套菜单 -->
           <VMenu location="end" offset-x min-width="200" v-model="showThemeMenu" :close-on-content-click="true">
             <template v-slot:activator="{ props: menuProps }">
@@ -677,8 +654,6 @@ onUnmounted(() => {
 
   <!-- 重启进度框 -->
   <ProgressDialog v-if="progressDialog" v-model="progressDialog" :text="t('app.restarting')" />
-  <!-- 用户认证对话框 -->
-  <UserAuthDialog v-if="siteAuthDialog" v-model="siteAuthDialog" @done="siteAuthDone" @close="siteAuthDialog = false" />
   <!-- 自定义 CSS -->
   <VDialog v-if="cssDialog" v-model="cssDialog" max-width="50rem" scrollable :fullscreen="!display.mdAndUp.value">
     <VCard>

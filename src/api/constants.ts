@@ -247,36 +247,12 @@ export const mediaTypeDict = mediaTypeOptions.reduce((dict, item) => {
 // 通知开关选项
 export const notificationSwitchOptions = [
   {
-    title: i18n.global.t('notificationSwitch.resourceDownload'),
-    value: '资源下载',
-  },
-  {
-    title: i18n.global.t('notificationSwitch.organize'),
-    value: '整理入库',
-  },
-  {
-    title: i18n.global.t('notificationSwitch.subscribe'),
-    value: '订阅',
-  },
-  {
-    title: i18n.global.t('notificationSwitch.site'),
-    value: '站点',
-  },
-  {
-    title: i18n.global.t('notificationSwitch.mediaServer'),
-    value: '媒体服务器',
-  },
-  {
-    title: i18n.global.t('notificationSwitch.manual'),
-    value: '手动处理',
-  },
-  {
-    title: i18n.global.t('notificationSwitch.plugin'),
-    value: '插件',
+    title: i18n.global.t('notificationSwitch.addon'),
+    value: 'Addon',
   },
   {
     title: i18n.global.t('notificationSwitch.other'),
-    value: '其它',
+    value: 'Other',
   },
 ]
 

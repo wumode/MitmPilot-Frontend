@@ -123,7 +123,7 @@ function showUpdateHistory() {
 async function uninstallPlugin() {
   const isConfirmed = await createConfirm({
     title: t('common.confirm'),
-    content: t('plugin.confirmUninstall', { name: props.plugin?.plugin_name }),
+    content: t('plugin.confirmUninstall', { name: props.plugin?.addon_name }),
   })
 
   if (!isConfirmed) return
@@ -131,19 +131,19 @@ async function uninstallPlugin() {
   try {
     // 显示等待提示框
     progressDialog.value = true
-    progressText.value = t('plugin.uninstalling', { name: props.plugin?.plugin_name })
-    const result: { [key: string]: any } = await api.delete(`plugin/${props.plugin?.id}`)
+    progressText.value = t('plugin.uninstalling', { name: props.plugin?.addon_name })
+    const result: { [key: string]: any } = await api.delete(`addon/${props.plugin?.addon_id}`)
     // 隐藏等待提示框
     progressDialog.value = false
     if (result.success) {
-      $toast.success(t('plugin.uninstallSuccess', { name: props.plugin?.plugin_name }))
+      $toast.success(t('plugin.uninstallSuccess', { name: props.plugin?.addon_name }))
 
       // 通知父组件刷新
       emit('remove')
     } else {
       $toast.error(
         t('plugin.uninstallFailed', {
-          name: props.plugin?.plugin_name,
+          name: props.plugin?.addon_name,
           message: result.message,
         }),
       )
@@ -170,12 +170,12 @@ async function showPluginConfig() {
 const iconPath: Ref<string> = computed(() => {
   if (imageLoadError.value) return getLogoUrl('plugin')
   // 如果是网络图片则使用代理后返回
-  if (props.plugin?.plugin_icon?.startsWith('http'))
+  if (props.plugin?.addon_icon?.startsWith('http'))
     return `${import.meta.env.VITE_API_BASE_URL}system/img/1?imgurl=${encodeURIComponent(
-      props.plugin?.plugin_icon,
+      props.plugin?.addon_icon,
     )}&cache=true`
 
-  return `./plugin_icon/${props.plugin?.plugin_icon}`
+  return `./plugin_icon/${props.plugin?.addon_icon}`
 })
 
 // 插件作者头像路径
@@ -190,21 +190,21 @@ const authorPath: Ref<string> = computed(() => {
 async function resetPlugin() {
   const isConfirmed = await createConfirm({
     title: t('common.confirm'),
-    content: t('plugin.confirmReset', { name: props.plugin?.plugin_name }),
+    content: t('plugin.confirmReset', { name: props.plugin?.addon_name }),
   })
 
   if (!isConfirmed) return
 
   try {
-    const result: { [key: string]: any } = await api.get(`plugin/reset/${props.plugin?.id}`)
+    const result: { [key: string]: any } = await api.get(`addon/reset/${props.plugin?.addon_id}`)
     if (result.success) {
-      $toast.success(t('plugin.resetSuccess', { name: props.plugin?.plugin_name }))
+      $toast.success(t('plugin.resetSuccess', { name: props.plugin?.addon_name }))
       // 通知父组件刷新
       emit('save')
     } else {
       $toast.error(
         t('plugin.resetFailed', {
-          name: props.plugin?.plugin_name,
+          name: props.plugin?.addon_name,
           message: result.message,
         }),
       )
@@ -220,9 +220,9 @@ async function updatePlugin() {
     releaseDialog.value = false
     // 显示等待提示框
     progressDialog.value = true
-    progressText.value = t('plugin.updating', { name: props.plugin?.plugin_name })
+    progressText.value = t('plugin.updating', { name: props.plugin?.addon_name })
 
-    const result: { [key: string]: any } = await api.get(`plugin/install/${props.plugin?.id}`, {
+    const result: { [key: string]: any } = await api.get(`addon/install/${props.plugin?.addon_id}`, {
       params: {
         repo_url: props.plugin?.repo_url,
         force: true,
@@ -233,14 +233,14 @@ async function updatePlugin() {
     progressDialog.value = false
 
     if (result.success) {
-      $toast.success(t('plugin.updateSuccess', { name: props.plugin?.plugin_name }))
+      $toast.success(t('plugin.updateSuccess', { name: props.plugin?.addon_name }))
 
       // 通知父组件刷新
       emit('save')
     } else {
       $toast.error(
         t('plugin.updateFailed', {
-          name: props.plugin?.plugin_name,
+          name: props.plugin?.addon_name,
           message: result.message,
         }),
       )
@@ -259,7 +259,7 @@ function visitAuthorPage() {
 function openLoggerWindow() {
   const url = `${
     import.meta.env.VITE_API_BASE_URL
-  }system/logging?length=-1&logfile=plugins/${props.plugin?.id?.toLowerCase()}.log`
+  }system/logging2?length=-1&logfile=plugins/${props.plugin?.addon_id?.toLowerCase()}.log`
   window.open(url, '_blank')
 }
 
@@ -279,10 +279,10 @@ function configDone() {
 function showPluginClone() {
   cloneForm.value = {
     suffix: '',
-    name: t('plugin.cloneDefaultName', { name: props.plugin?.plugin_name }),
-    description: t('plugin.cloneDefaultDescription', { description: props.plugin?.plugin_desc }),
-    version: props.plugin?.plugin_version || '1.0',
-    icon: props.plugin?.plugin_icon || '',
+    name: t('plugin.cloneDefaultName', { name: props.plugin?.addon_name }),
+    description: t('plugin.cloneDefaultDescription', { description: props.plugin?.addon_desc }),
+    version: props.plugin?.addon_version || '1.0',
+    icon: props.plugin?.addon_icon || '',
   }
   pluginCloneDialog.value = true
 }
@@ -296,9 +296,9 @@ async function executePluginClone() {
 
   try {
     progressDialog.value = true
-    progressText.value = t('plugin.cloning', { name: props.plugin?.plugin_name })
+    progressText.value = t('plugin.cloning', { name: props.plugin?.addon_name })
 
-    const result: { [key: string]: any } = await api.post(`plugin/clone/${props.plugin?.id}`, {
+    const result: { [key: string]: any } = await api.post(`addon/clone/${props.plugin?.addon_id}`, {
       suffix: cloneForm.value.suffix.trim(),
       name: cloneForm.value.name.trim(),
       description: cloneForm.value.description.trim(),
@@ -448,14 +448,14 @@ watch(
                 class="text-white px-2 pb-0 text-lg text-shadow whitespace-nowrap overflow-hidden text-ellipsis"
               >
                 <VBadge dot inline :color="props.plugin?.state ? 'success' : 'secondary'" />
-                {{ props.plugin?.plugin_name }}
-                <span class="text-sm mt-1 text-gray-200"> v{{ props.plugin?.plugin_version }} </span>
+                {{ props.plugin?.addon_name }}
+                <span class="text-sm mt-1 text-gray-200"> v{{ props.plugin?.addon_version }} </span>
               </VCardTitle>
             </VCardText>
             <div class="relative flex flex-row items-start px-2 justify-between grow">
               <div class="relative flex-1 min-w-0">
                 <div class="px-2 py-1 text-white text-sm text-shadow overflow-hidden line-clamp-3 ...">
-                  {{ props.plugin?.plugin_desc }}
+                  {{ props.plugin?.addon_desc }}
                 </div>
               </div>
               <div class="relative flex-shrink-0 self-center pb-3" :class="{ 'cursor-move': display.mdAndUp.value }">
@@ -488,7 +488,7 @@ watch(
                   @click.stop
                   class="overflow-hidden text-ellipsis whitespace-nowrap"
                 >
-                  {{ props.plugin?.plugin_author }}
+                  {{ props.plugin?.addon_author }}
                 </a>
               </div>
               <span v-if="props.count" class="ms-2 flex-shrink-0 download-count items-center align-middle">
@@ -549,7 +549,7 @@ watch(
 
     <!-- 更新日志 -->
     <VDialog v-if="releaseDialog" v-model="releaseDialog" width="600" scrollable :fullscreen="!display.mdAndUp.value">
-      <VCard :title="t('plugin.updateHistoryTitle', { name: props.plugin?.plugin_name })">
+      <VCard :title="t('plugin.updateHistoryTitle', { name: props.plugin?.addon_name })">
         <VDialogCloseBtn @click="releaseDialog = false" />
         <VDivider />
         <VersionHistory :history="props.plugin?.history" />
@@ -589,7 +589,7 @@ watch(
         </VCardItem>
         <VDivider />
         <VCardText>
-          <LoggingView :logfile="`plugins/${props.plugin?.id?.toLowerCase()}.log`" />
+          <LoggingView :logfile="`plugins/${props.plugin?.addon_id?.toLowerCase()}.log`" />
         </VCardText>
       </VCard>
     </VDialog>
@@ -608,7 +608,7 @@ watch(
             <VIcon icon="mdi-content-copy" class="me-2" />
           </template>
           <VCardTitle>{{ t('plugin.cloneTitle') }}</VCardTitle>
-          <VCardSubtitle>{{ t('plugin.cloneSubtitle', { name: props.plugin?.plugin_name }) }}</VCardSubtitle>
+          <VCardSubtitle>{{ t('plugin.cloneSubtitle', { name: props.plugin?.addon_name }) }}</VCardSubtitle>
         </VCardItem>
         <VDialogCloseBtn @click="pluginCloneDialog = false" />
         <VDivider />

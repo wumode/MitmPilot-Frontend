@@ -34,7 +34,7 @@ export default defineConfig({
       include: [resolve(__dirname, 'src/locales/*.ts')],
     }),
     federation({
-      name: 'MoviePilot',
+      name: 'MitmPilot',
       filename: 'remoteEntry.js',
       // @ts-ignore
       remotes: {
@@ -156,9 +156,9 @@ export default defineConfig({
         type: 'module',
       },
       manifest: {
-        'name': 'MoviePilot',
-        'short_name': 'MoviePilot',
-        'description': 'MoviePilot - 智能影视媒体库管理工具',
+        'name': 'MitmPilot',
+        'short_name': 'MitmPilot',
+        'description': 'MitmPilot - A Python tool for managing, packaging, and sharing mitmproxy addons.',
         'start_url': './',
         'scope': './',
         'display': 'standalone',
@@ -250,14 +250,14 @@ export default defineConfig({
             'sizes': '512x512',
             'type': 'image/png',
             'form_factor': 'wide',
-            'label': 'MoviePilot 主界面',
+            'label': 'MitmPilot 主界面',
           },
           {
             'src': './android-chrome-192x192.png',
             'sizes': '192x192',
             'type': 'image/png',
             'form_factor': 'narrow',
-            'label': 'MoviePilot 移动端',
+            'label': 'MitmPilot 移动端',
           },
         ],
         'protocol_handlers': [
@@ -312,9 +312,10 @@ export default defineConfig({
     entries: ['./src/**/*.vue'],
   },
   server: {
+    port: 6008,
     proxy: {
       '/api/v1': {
-        target: 'http://localhost:3001',
+        target: 'http://localhost:6006',
         changeOrigin: true,
         secure: false,
         cookieDomainRewrite: 'localhost',

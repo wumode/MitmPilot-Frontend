@@ -73,29 +73,6 @@ const SystemSettings = ref<any>({
   },
 })
 
-// 刮削开关设置
-const ScrapingSwitchs = ref<any>({
-  movie_nfo: true, // 电影NFO
-  movie_poster: true, // 电影海报
-  movie_backdrop: true, // 电影背景图
-  movie_logo: true, // 电影Logo
-  movie_disc: true, // 电影光盘图
-  movie_banner: true, // 电影横幅图
-  movie_thumb: true, // 电影缩略图
-  tv_nfo: true, // 电视剧NFO
-  tv_poster: true, // 电视剧海报
-  tv_backdrop: true, // 电视剧背景图
-  tv_banner: true, // 电视剧横幅图
-  tv_logo: true, // 电视剧Logo
-  tv_thumb: true, // 电视剧缩略图
-  season_nfo: true, // 季NFO
-  season_poster: true, // 季海报
-  season_banner: true, // 季横幅图
-  season_thumb: true, // 季缩略图
-  episode_nfo: true, // 集NFO
-  episode_thumb: true, // 集缩略图
-})
-
 // 是否发送请求的总开关
 const isRequest = ref(true)
 
@@ -160,35 +137,6 @@ function addSecurityDomain() {
   }
 }
 
-// 调用API查询下载器设置
-async function loadDownloaderSetting() {
-  try {
-    const result: { [key: string]: any } = await api.get('system/setting/Downloaders')
-    downloaders.value = result.data?.value ?? []
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-// 调用API保存下载器设置
-async function saveDownloaderSetting() {
-  try {
-    // 提取启用的下载器
-    const enabledDownloaders = downloaders.value.filter(item => item.enabled)
-    // 有启动的下载器时
-    if (enabledDownloaders.length > 0) {
-      downloaders.value = handleDefaultDownloaders(enabledDownloaders, downloaders.value)
-    }
-    const result: { [key: string]: any } = await api.post('system/setting/Downloaders', downloaders.value)
-    if (result.success) $toast.success(t('setting.system.downloaderSaveSuccess'))
-    else $toast.error(t('setting.system.downloaderSaveFailed'))
-
-    await loadDownloaderSetting()
-  } catch (error) {
-    console.log(error)
-  }
-}
-
 // 处理默认下载器状态
 function handleDefaultDownloaders(enabledDownloaders: any[], downloaders: any[]) {
   const enabledDefaultDownloader = enabledDownloaders.find(item => item.default)
@@ -203,29 +151,6 @@ function handleDefaultDownloaders(enabledDownloaders: any[], downloaders: any[])
     })
   }
   return downloaders
-}
-
-// 调用API查询媒体服务器设置
-async function loadMediaServerSetting() {
-  try {
-    const result: { [key: string]: any } = await api.get('system/setting/MediaServers')
-    mediaServers.value = result.data?.value ?? []
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-// 调用API保存媒体服务器设置
-async function saveMediaServerSetting() {
-  try {
-    const result: { [key: string]: any } = await api.post('system/setting/MediaServers', mediaServers.value)
-    if (result.success) $toast.success(t('setting.system.mediaServerSaveSuccess'))
-    else $toast.error(t('setting.system.mediaServerSaveFailed'))
-
-    await loadMediaServerSetting()
-  } catch (error) {
-    console.log(error)
-  }
 }
 
 // 加载系统设置
@@ -274,9 +199,8 @@ async function saveAdvancedSettings() {
 
   // 同时保存高级设置和刮削开关设置
   const advancedResult = await saveSystemSetting(SystemSettings.value.Advanced)
-  const scrapingResult = await saveScrapingSwitchs()
 
-  if (advancedResult && scrapingResult) {
+  if (advancedResult) {
     advancedDialog.value = false
     $toast.success(t('setting.system.advancedSaveSuccess'))
   }
@@ -306,9 +230,7 @@ async function copyValue(value: string) {
 
 // 登录首页壁纸来源
 const wallpaperItems = [
-  { title: t('setting.system.wallpaperItems.tmdb'), value: 'tmdb' },
   { title: t('setting.system.wallpaperItems.bing'), value: 'bing' },
-  { title: t('setting.system.wallpaperItems.mediaserver'), value: 'mediaserver' },
   { title: t('setting.system.wallpaperItems.customize'), value: 'customize' },
   { title: t('setting.system.wallpaperItems.none'), value: '' },
 ]
@@ -436,41 +358,9 @@ const fanartLanguageSelection = computed({
   },
 })
 
-// 加载刮削开关设置
-async function loadScrapingSwitchs() {
-  try {
-    const result: { [key: string]: any } = await api.get('system/setting/ScrapingSwitchs')
-    if (result.success && result.data?.value) {
-      ScrapingSwitchs.value = { ...ScrapingSwitchs.value, ...result.data.value }
-    }
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-// 保存刮削开关设置
-async function saveScrapingSwitchs() {
-  try {
-    const result: { [key: string]: any } = await api.post('system/setting/ScrapingSwitchs', ScrapingSwitchs.value)
-    if (result.success) {
-      return true
-    } else {
-      $toast.error(t('setting.system.scrapingSwitchSaveFailed', { message: result?.message }))
-      return false
-    }
-  } catch (error) {
-    console.log(error)
-    $toast.error(t('setting.system.scrapingSwitchSaveError'))
-    return false
-  }
-}
-
 // 加载数据
 onMounted(() => {
-  loadDownloaderSetting()
-  loadMediaServerSetting()
   loadSystemSettings()
-  loadScrapingSwitchs()
 })
 
 onActivated(async () => {
@@ -538,36 +428,6 @@ onDeactivated(() => {
                 </VRow>
               </VCol>
               <VCol cols="12" md="6">
-                <VSelect
-                  v-model="SystemSettings.Basic.RECOGNIZE_SOURCE"
-                  :label="t('setting.system.recognizeSource')"
-                  :hint="t('setting.system.recognizeSourceHint')"
-                  persistent-hint
-                  :items="[
-                    { title: 'TheMovieDb', value: 'themoviedb' },
-                    { title: '豆瓣', value: 'douban' },
-                  ]"
-                  prepend-inner-icon="mdi-database"
-                />
-              </VCol>
-              <VCol cols="12" md="6">
-                <VTextField
-                  v-model="SystemSettings.Basic.MEDIASERVER_SYNC_INTERVAL"
-                  :label="t('setting.system.mediaServerSyncInterval')"
-                  :hint="t('setting.system.mediaServerSyncIntervalHint')"
-                  persistent-hint
-                  :suffix="t('setting.system.hours')"
-                  type="number"
-                  min="1"
-                  :rules="[
-                    (v: any) => !!v || t('setting.system.required'),
-                    (v: any) => !isNaN(v) || t('setting.system.numbersOnly'),
-                    (v: any) => v >= 1 || t('setting.system.minInterval'),
-                  ]"
-                  prepend-inner-icon="mdi-sync"
-                />
-              </VCol>
-              <VCol cols="12" md="6">
                 <VTextField
                   v-model="SystemSettings.Basic.API_TOKEN"
                   :label="t('setting.system.apiToken')"
@@ -630,107 +490,6 @@ onDeactivated(() => {
       </VCard>
     </VCol>
   </VRow>
-  <VRow>
-    <VCol cols="12">
-      <VCard>
-        <VCardItem>
-          <VCardTitle>{{ t('setting.system.downloaders') }}</VCardTitle>
-          <VCardSubtitle>{{ t('setting.system.downloadersDesc') }}</VCardSubtitle>
-        </VCardItem>
-        <VCardText>
-          <draggable
-            v-model="downloaders"
-            handle=".cursor-move"
-            item-key="name"
-            tag="div"
-            :component-data="{ 'class': 'grid gap-3 grid-app-card' }"
-          >
-            <template #item="{ element }">
-              <DownloaderCard
-                :downloader="element"
-                :downloaders="downloaders"
-                @close="removeDownloader(element)"
-                @change="onDownloaderChange"
-                :allow-refresh="isRequest"
-              />
-            </template>
-          </draggable>
-        </VCardText>
-        <VCardText>
-          <VForm @submit.prevent="() => {}">
-            <div class="d-flex flex-wrap gap-4 mt-4">
-              <VBtn type="submit" @click="saveDownloaderSetting" prepend-icon="mdi-content-save">
-                {{ t('common.save') }}
-              </VBtn>
-              <VBtn color="success" variant="tonal">
-                <VIcon icon="mdi-plus" />
-                <VMenu activator="parent" close-on-content-click>
-                  <VList>
-                    <VListItem v-for="item in downloaderOptions" @click="addDownloader(item.value)">
-                      <VListItemTitle>{{ item.title }}</VListItemTitle>
-                    </VListItem>
-                    <VListItem @click="addDownloader('custom')">
-                      <VListItemTitle>{{ t('setting.system.custom') }}</VListItemTitle>
-                    </VListItem>
-                  </VList>
-                </VMenu>
-              </VBtn>
-            </div>
-          </VForm>
-        </VCardText>
-      </VCard>
-    </VCol>
-  </VRow>
-  <VRow>
-    <VCol cols="12">
-      <VCard>
-        <VCardItem>
-          <VCardTitle>{{ t('setting.system.mediaServers') }}</VCardTitle>
-          <VCardSubtitle>{{ t('setting.system.mediaServersDesc') }}</VCardSubtitle>
-        </VCardItem>
-        <VCardText>
-          <draggable
-            v-model="mediaServers"
-            handle=".cursor-move"
-            item-key="name"
-            tag="div"
-            :component-data="{ 'class': 'grid gap-3 grid-app-card' }"
-          >
-            <template #item="{ element }">
-              <MediaServerCard
-                :mediaserver="element"
-                :mediaservers="mediaServers"
-                @close="removeMediaServer(element)"
-                @change="onMediaServerChange"
-              />
-            </template>
-          </draggable>
-        </VCardText>
-        <VCardText>
-          <VForm @submit.prevent="() => {}">
-            <div class="d-flex flex-wrap gap-4 mt-4">
-              <VBtn type="submit" @click="saveMediaServerSetting" prepend-icon="mdi-content-save">
-                {{ t('common.save') }}
-              </VBtn>
-              <VBtn color="success" variant="tonal">
-                <VIcon icon="mdi-plus" />
-                <VMenu activator="parent" close-on-content-click>
-                  <VList>
-                    <VListItem v-for="item in mediaServerOptions" @click="addMediaServer(item.value)">
-                      <VListItemTitle>{{ item.title }}</VListItemTitle>
-                    </VListItem>
-                    <VListItem @click="addMediaServer('custom')">
-                      <VListItemTitle>{{ t('setting.system.custom') }}</VListItemTitle>
-                    </VListItem>
-                  </VList>
-                </VMenu>
-              </VBtn>
-            </div>
-          </VForm>
-        </VCardText>
-      </VCard>
-    </VCol>
-  </VRow>
 
   <!-- 高级系统设置 -->
   <VDialog
@@ -753,9 +512,6 @@ onDeactivated(() => {
         <VTabs v-model="activeTab" show-arrows>
           <VTab value="system">
             <div>{{ t('setting.system.system') }}</div>
-          </VTab>
-          <VTab value="media">
-            <div>{{ t('setting.system.media') }}</div>
           </VTab>
           <VTab value="network">
             <div>{{ t('setting.system.network') }}</div>
@@ -842,282 +598,6 @@ onDeactivated(() => {
                     :hint="t('setting.system.autoUpdateResourceHint')"
                     persistent-hint
                   />
-                </VCol>
-              </VRow>
-            </div>
-          </VWindowItem>
-          <VWindowItem value="media">
-            <div>
-              <VRow>
-                <VCol cols="12" md="6">
-                  <VCombobox
-                    v-model="SystemSettings.Advanced.TMDB_API_DOMAIN"
-                    :label="t('setting.system.tmdbApiDomain')"
-                    :hint="t('setting.system.tmdbApiDomainHint')"
-                    persistent-hint
-                    :placeholder="t('setting.system.tmdbApiDomainPlaceholder')"
-                    :items="['api.themoviedb.org', 'api.tmdb.org']"
-                    :rules="[(v: string) => !!v || t('setting.system.tmdbApiDomainRequired')]"
-                    prepend-inner-icon="mdi-api"
-                  />
-                </VCol>
-                <VCol cols="12" md="6">
-                  <VCombobox
-                    v-model="SystemSettings.Advanced.TMDB_IMAGE_DOMAIN"
-                    :label="t('setting.system.tmdbImageDomain')"
-                    :hint="t('setting.system.tmdbImageDomainHint')"
-                    persistent-hint
-                    :placeholder="t('setting.system.tmdbImageDomainPlaceholder')"
-                    :items="['image.tmdb.org']"
-                    :rules="[(v: string) => !!v || t('setting.system.tmdbImageDomainRequired')]"
-                    prepend-inner-icon="mdi-image"
-                  />
-                </VCol>
-                <VCol cols="12" md="6">
-                  <VSelect
-                    v-model="SystemSettings.Advanced.TMDB_LOCALE"
-                    :label="t('setting.system.tmdbLocale')"
-                    :hint="t('setting.system.tmdbLocaleHint')"
-                    persistent-hint
-                    :placeholder="t('setting.system.tmdbLocalePlaceholder')"
-                    :items="tmdbLanguageItems"
-                    prepend-inner-icon="mdi-translate"
-                  />
-                </VCol>
-                <VCol cols="12" md="6">
-                  <VTextField
-                    v-model="SystemSettings.Advanced.META_CACHE_EXPIRE"
-                    :label="t('setting.system.metaCacheExpire')"
-                    :hint="t('setting.system.metaCacheExpireHint')"
-                    persistent-hint
-                    min="0"
-                    type="number"
-                    :suffix="t('setting.system.hour')"
-                    :rules="[
-                      (v: any) => v === 0 || !!v || t('setting.system.metaCacheExpireRequired'),
-                      (v: any) => v >= 0 || t('setting.system.metaCacheExpireMin'),
-                    ]"
-                    prepend-inner-icon="mdi-timer"
-                  />
-                </VCol>
-              </VRow>
-              <VRow>
-                <VCol cols="12" md="6">
-                  <VSwitch
-                    v-model="SystemSettings.Advanced.SCRAP_FOLLOW_TMDB"
-                    :label="t('setting.system.scrapFollowTmdb')"
-                    :hint="t('setting.system.scrapFollowTmdbHint')"
-                    persistent-hint
-                  />
-                </VCol>
-                <VCol cols="12" md="6">
-                  <VSwitch
-                    v-model="SystemSettings.Advanced.TMDB_SCRAP_ORIGINAL_IMAGE"
-                    :label="t('setting.system.scrapOriginalImage')"
-                    :hint="t('setting.system.scrapOriginalImageHint')"
-                    persistent-hint
-                  />
-                </VCol>
-                <VCol cols="12" md="6">
-                  <VSwitch
-                    v-model="SystemSettings.Advanced.FANART_ENABLE"
-                    :label="t('setting.system.fanartEnable')"
-                    :hint="t('setting.system.fanartEnableHint')"
-                    persistent-hint
-                  />
-                </VCol>
-                <VCol v-if="SystemSettings.Advanced.FANART_ENABLE" cols="12" md="6">
-                  <VSelect
-                    v-model="fanartLanguageSelection"
-                    :label="t('setting.system.fanartLang')"
-                    :hint="t('setting.system.fanartLangHint')"
-                    persistent-hint
-                    :items="fanartLanguageItems"
-                    multiple
-                    chips
-                    closable-chips
-                    prepend-inner-icon="mdi-translate"
-                  />
-                </VCol>
-              </VRow>
-
-              <!-- 刮削开关设置 -->
-              <VRow class="mt-4">
-                <VCol cols="12">
-                  <VExpansionPanels>
-                    <VExpansionPanel>
-                      <VExpansionPanelTitle class="text-lg">
-                        <template #default>
-                          <VIcon icon="mdi-checkbox-multiple-outline" class="me-2" />
-                          {{ t('setting.system.scrapingSwitchSettings') }}
-                        </template>
-                      </VExpansionPanelTitle>
-                      <VExpansionPanelText>
-                        <VRow>
-                          <VCol cols="12" class="pb-2">
-                            <VListSubheader class="text-lg">{{ t('setting.system.movie') }}</VListSubheader>
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.movie_nfo"
-                              :label="t('setting.system.movieNfo')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.movie_poster"
-                              :label="t('setting.system.moviePoster')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.movie_backdrop"
-                              :label="t('setting.system.movieBackdrop')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.movie_logo"
-                              :label="t('setting.system.movieLogo')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.movie_disc"
-                              :label="t('setting.system.movieDisc')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.movie_banner"
-                              :label="t('setting.system.movieBanner')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.movie_thumb"
-                              :label="t('setting.system.movieThumb')"
-                              density="compact"
-                            />
-                          </VCol>
-                        </VRow>
-
-                        <VDivider class="my-4" />
-
-                        <VRow>
-                          <VCol cols="12" class="pb-2">
-                            <VListSubheader class="text-lg">{{ t('setting.system.tv') }}</VListSubheader>
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.tv_nfo"
-                              :label="t('setting.system.tvNfo')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.tv_poster"
-                              :label="t('setting.system.tvPoster')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.tv_backdrop"
-                              :label="t('setting.system.tvBackdrop')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.tv_banner"
-                              :label="t('setting.system.tvBanner')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.tv_logo"
-                              :label="t('setting.system.tvLogo')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.tv_thumb"
-                              :label="t('setting.system.tvThumb')"
-                              density="compact"
-                            />
-                          </VCol>
-                        </VRow>
-
-                        <VDivider class="my-4" />
-
-                        <VRow>
-                          <VCol cols="12" class="pb-2">
-                            <VListSubheader class="text-lg">{{ t('setting.system.season') }}</VListSubheader>
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.season_nfo"
-                              :label="t('setting.system.seasonNfo')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.season_poster"
-                              :label="t('setting.system.seasonPoster')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.season_banner"
-                              :label="t('setting.system.seasonBanner')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.season_thumb"
-                              :label="t('setting.system.seasonThumb')"
-                              density="compact"
-                            />
-                          </VCol>
-                        </VRow>
-
-                        <VDivider class="my-4" />
-
-                        <VRow>
-                          <VCol cols="12" class="pb-2">
-                            <VListSubheader class="text-lg">{{ t('setting.system.episode') }}</VListSubheader>
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.episode_nfo"
-                              :label="t('setting.system.episodeNfo')"
-                              density="compact"
-                            />
-                          </VCol>
-                          <VCol cols="6" md="3">
-                            <VCheckbox
-                              v-model="ScrapingSwitchs.episode_thumb"
-                              :label="t('setting.system.episodeThumb')"
-                              density="compact"
-                            />
-                          </VCol>
-                        </VRow>
-                      </VExpansionPanelText>
-                    </VExpansionPanel>
-                  </VExpansionPanels>
                 </VCol>
               </VRow>
             </div>

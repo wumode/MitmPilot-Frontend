@@ -1,5 +1,5 @@
 {
-  "name": "moviepilot",
+  "name": "mitmpilot",
   "version": "2.8.1",
   "private": true,
   "type": "module",
@@ -12,7 +12,7 @@
     "lint": "eslint . -c .eslintrc.js --fix --ext .ts,.js,.vue,.tsx,.jsx",
     "build:icons": "tsc -b src/@iconify && node src/@iconify/build-icons.js",
     "postinstall": "npm run build:icons",
-    "pkg": "pkg . -t node18-win-x64 -o MoviePilot-Frontend.exe"
+    "pkg": "pkg . -t node18-win-x64 -o MitmPilot-Frontend.exe"
   },
   "pkg": {
     "assets": [
@@ -20,21 +20,10 @@
     ]
   },
   "dependencies": {
-    "@fullcalendar/core": "^6.1.15",
-    "@fullcalendar/daygrid": "^6.1.15",
-    "@fullcalendar/interaction": "^6.1.15",
-    "@fullcalendar/list": "^6.1.15",
-    "@fullcalendar/timegrid": "^6.1.15",
-    "@fullcalendar/vue3": "^6.1.15",
     "@iconify/utils": "^2.2.1",
+    "@microsoft/fetch-event-source": "^2.0.1",
     "@types/crypto-js": "^4.2.2",
     "@types/js-cookie": "^3.0.6",
-    "@vue-flow/background": "^1.3.2",
-    "@vue-flow/controls": "^1.1.2",
-    "@vue-flow/core": "^1.42.1",
-    "@vue-flow/minimap": "^1.5.2",
-    "@vue-flow/node-resizer": "^1.4.0",
-    "@vue-flow/node-toolbar": "^1.1.0",
     "@vue-js-cron/vuetify": "^5.0.9",
     "@vueuse/core": "^12.4.0",
     "@vueuse/math": "^12.4.0",

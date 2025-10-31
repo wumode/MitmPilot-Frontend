@@ -51,12 +51,12 @@ const dynamicComponent = defineAsyncComponent({
   // 工厂函数
   loader: async () => {
     try {
-      if (!props.plugin?.id) {
+      if (!props.plugin?.addon_id) {
         throw new Error('插件ID不存在')
       }
 
       // 动态加载远程组件
-      const module = await loadRemoteComponent(props.plugin.id, 'Config')
+      const module = await loadRemoteComponent(props.plugin.addon_id, 'Config')
 
       // 直接返回加载的组件，无需再获取default
       return module
@@ -92,9 +92,9 @@ async function loadPluginUIData() {
 
   try {
     // 获取UI定义
-    const result: { [key: string]: any } = await api.get(`plugin/form/${props.plugin?.id}`)
+    const result: { [key: string]: any } = await api.get(`addon/form/${props.plugin?.addon_id}`)
     if (!result) {
-      console.error(`插件 ${props.plugin?.plugin_name} UI数据加载失败：无效的响应`)
+      console.error(`插件 ${props.plugin?.addon_name} UI数据加载失败：无效的响应`)
       return
     }
     renderMode.value = result.render_mode
@@ -127,15 +127,15 @@ function handleVueComponentSave(newConfig: Record<string, any>) {
 async function savePluginConf() {
   // 显示等待提示框
   progressDialog.value = true
-  progressText.value = t('dialog.pluginConfig.saving', { name: props.plugin?.plugin_name })
+  progressText.value = t('dialog.pluginConfig.saving', { name: props.plugin?.addon_name })
   try {
-    const result: { [key: string]: any } = await api.put(`plugin/${props.plugin?.id}`, pluginConfigForm.value)
+    const result: { [key: string]: any } = await api.put(`addon/${props.plugin?.addon_id}`, pluginConfigForm.value)
     if (result.success) {
-      $toast.success(t('dialog.pluginConfig.saveSuccess', { name: props.plugin?.plugin_name }))
+      $toast.success(t('dialog.pluginConfig.saveSuccess', { name: props.plugin?.addon_name }))
       // 通知父组件刷新
       emit('save')
     } else {
-      $toast.error(t('dialog.pluginConfig.saveFailed', { name: props.plugin?.plugin_name, message: result.message }))
+      $toast.error(t('dialog.pluginConfig.saveFailed', { name: props.plugin?.addon_name, message: result.message }))
     }
   } catch (error) {
     console.error(error)
@@ -150,7 +150,7 @@ onBeforeMount(async () => {
 <template>
   <VDialog scrollable max-width="60rem" :fullscreen="!display.mdAndUp.value">
     <!-- Vuetify 渲染模式 -->
-    <VCard v-if="renderMode === 'vuetify'" :title="`${props.plugin?.plugin_name} - ${t('dialog.pluginConfig.title')}`">
+    <VCard v-if="renderMode === 'vuetify'" :title="`${props.plugin?.addon_name} - ${t('dialog.pluginConfig.title')}`">
       <VDialogCloseBtn @click="emit('close')" />
       <VDivider />
       <LoadingBanner v-if="!isRefreshed" class="mt-5" />
